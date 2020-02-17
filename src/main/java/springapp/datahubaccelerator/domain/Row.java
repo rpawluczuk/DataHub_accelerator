@@ -1,6 +1,6 @@
 package springapp.datahubaccelerator.domain;
 
-public class Column {
+public class Row {
 
     String targetExtract;
     String datatype;

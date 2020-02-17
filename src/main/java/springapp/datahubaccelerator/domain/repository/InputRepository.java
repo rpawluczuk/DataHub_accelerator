@@ -17,4 +17,10 @@ public class InputRepository {
     public void saveInput(Input input) {
         entityManager.merge(input);
     }
+
+    @Transactional
+    public Input getLastInput() {
+        int lastId = entityManager.createQuery("from Input", Input.class).getResultList().size();
+        return entityManager.find(Input.class, lastId);
+    }
 }

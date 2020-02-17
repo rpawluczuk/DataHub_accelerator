@@ -23,15 +23,9 @@ public class InputController {
         return "addinput";
     }
 
-    @RequestMapping(value = "/columngenerator", method = RequestMethod.POST)
+    @RequestMapping(value = "/rowgenerator", method = RequestMethod.POST)
     public String saveStructure(Input input){
             inputService.saveInput(input);
-            return "redirect:/columngenerator";
-    }
-
-    @RequestMapping("/columngenerator")
-    public String generateColumns(Model model){
-        model.addAttribute("input", new Input());
-        return "columngenerator";
+            return "redirect:/rowgenerator";
     }
 }

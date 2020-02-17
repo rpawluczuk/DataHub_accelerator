@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="container">
-    <form class="form-horizontal" th:object="${input}" th:action="@{/columngenerator}" th:method="post">
+    <form class="form-horizontal" th:object="${input}" th:action="@{/rowgenerator}" th:method="post">
         <div class="form-group">
             <label class="control-label">targetExtract:</label>
             <input type="text" class="form-control" th:field="*{targetExtract}"/>

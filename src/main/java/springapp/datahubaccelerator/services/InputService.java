@@ -14,4 +14,8 @@ public class InputService {
     public void saveInput(Input input) {
         inputRepository.saveInput(input);
     }
+
+    public Input getLastInput() {
+        return inputRepository.getLastInput();
+    }
 }
