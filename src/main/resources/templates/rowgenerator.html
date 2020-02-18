@@ -11,9 +11,24 @@
 </head>
 <body>
 <div class="container">
-    <p th:text="${input.id}"></p>
-    <p th:text="${input.targetExtract}"></p>
-    <p th:text="${input.datatype}"></p>
+    <table class="table table-striped table-dark">
+        <thead>
+        <tr>
+            <td>targetExtract</td>
+            <td>datatype</td>
+            <td></td>
+        </tr>
+        </thead>
+        <tbody th:each="field:${fields}">
+        <tr>
+            <td th:text="${field.targetExtract}"></td>
+            <td th:text="${field.datatype}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="row">
+        <a href="/scriptgenerator" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">Generate SQL script</a>
+    </div>
 </div>
 </body>
 </html>
