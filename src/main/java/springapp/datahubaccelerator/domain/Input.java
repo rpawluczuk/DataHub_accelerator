@@ -1,12 +1,11 @@
 package springapp.datahubaccelerator.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class Input {
+
+    static final private int COLUMNS_LENGTH = 5000;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -14,11 +13,28 @@ public class Input {
 
     String userStoryNumber;
     String entityName;
+
+    @Column(length = COLUMNS_LENGTH)
     String targetExtract;
+
+    @Column(length = COLUMNS_LENGTH)
     String datatype;
+
+    @Column(length = COLUMNS_LENGTH)
     String columnName;
 
+    @Column(length = COLUMNS_LENGTH)
+    String generalRuleApplied;
+
     public Input() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUserStoryNumber() {
@@ -35,14 +51,6 @@ public class Input {
 
     public void setEntityName(String entityName) {
         this.entityName = entityName;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getTargetExtract() {
@@ -67,5 +75,13 @@ public class Input {
 
     public void setDatatype(String datatype) {
         this.datatype = datatype;
+    }
+
+    public String getGeneralRuleApplied() {
+        return generalRuleApplied;
+    }
+
+    public void setGeneralRuleApplied(String generalRuleApplied) {
+        this.generalRuleApplied = generalRuleApplied;
     }
 }

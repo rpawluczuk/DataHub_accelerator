@@ -22,15 +22,19 @@
         </div>
         <div class="form-group">
             <label class="control-label">target extract:</label>
-            <input type="text" class="form-control" th:field="*{targetExtract}"/>
+            <textarea type="text" class="form-control" th:field="*{targetExtract}"/>
         </div>
         <div class="form-group">
             <label class="control-label">column name:</label>
-            <input type="text" class="form-control" th:field="*{columnName}"/>
+            <textarea type="text" class="form-control" th:field="*{columnName}"/>
         </div>
         <div class="form-group">
             <label class="control-label">datatype:</label>
-            <input type="text" class="form-control" th:field="*{datatype}"/>
+            <textarea type="text" class="form-control" th:field="*{datatype}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">general rule applied:</label>
+            <textarea type="text" class="form-control" th:field="*{generalRuleApplied}"/>
         </div>
         <div class="field">
             <button type="submit" class="btn btn-dark">Generate Columns</button>
