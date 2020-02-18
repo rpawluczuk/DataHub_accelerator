@@ -7,6 +7,7 @@ import springapp.datahubaccelerator.domain.Input;
 import springapp.datahubaccelerator.domain.repository.FieldRepository;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class FieldService {
@@ -20,5 +21,9 @@ public class FieldService {
 
     public void generateField(Input input) {
         fieldRepository.generateField(input);
+    }
+
+    public String generateScript(List<Field> allFields) {
+        return fieldRepository.generateScript(allFields);
     }
 }

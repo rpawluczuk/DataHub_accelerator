@@ -12,10 +12,29 @@ public class Input {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
+    String userStoryNumber;
+    String entityName;
     String targetExtract;
     String datatype;
+    String columnName;
 
     public Input() {
+    }
+
+    public String getUserStoryNumber() {
+        return userStoryNumber;
+    }
+
+    public void setUserStoryNumber(String userStoryNumber) {
+        this.userStoryNumber = userStoryNumber;
+    }
+
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
     }
 
     public Integer getId() {
@@ -32,6 +51,14 @@ public class Input {
 
     public void setTargetExtract(String targetExtract) {
         this.targetExtract = targetExtract;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
     public String getDatatype() {

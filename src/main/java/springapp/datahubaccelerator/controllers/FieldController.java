@@ -24,8 +24,18 @@ public class FieldController {
     public String generateColumns(Model model){
         Input input = inputService.getLastInput();
         fieldService.generateField(input);
+        Field.setUserStoryNumber(input.getUserStoryNumber());
+        Field.setEntityName(input.getEntityName());
         List<Field> allFields = fieldService.getAllFields();
         model.addAttribute("fields", allFields);
         return "rowgenerator";
+    }
+
+    @RequestMapping("/scriptgenerator")
+    public String generateScript(Model model){
+        List<Field> allFields = fieldService.getAllFields();
+        String script = fieldService.generateScript(allFields);
+        model.addAttribute("script", script);
+        return "scriptgenerator";
     }
 }
