@@ -19,6 +19,7 @@
             <td>column name</td>
             <td>SCD Type</td>
             <td>General Rule Applied</td>
+            <td>Reason Added</td>
         </tr>
         </thead>
         <tbody th:each="field:${fields}">
@@ -28,6 +29,7 @@
             <td th:text="${field.datatype}"></td>
             <td th:text="${field.scdType}"></td>
             <td th:text="${field.generalRuleApplied}"></td>
+            <td th:text="${field.reasonAdded}"></td>
         </tr>
         </tbody>
     </table>

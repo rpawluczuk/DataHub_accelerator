@@ -5,13 +5,12 @@ import javax.persistence.*;
 @Entity
 public class Input {
 
-    static final private int COLUMNS_LENGTH = 5000;
+    private static final int COLUMNS_LENGTH = 5000;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    String userStoryNumber;
     String entityName;
 
     @Column(length = COLUMNS_LENGTH)
@@ -29,6 +28,9 @@ public class Input {
     @Column(length = COLUMNS_LENGTH)
     String generalRuleApplied;
 
+    @Column(length = COLUMNS_LENGTH)
+    String reasonAdded;
+
     public Input() {
     }
 
@@ -38,14 +40,6 @@ public class Input {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getUserStoryNumber() {
-        return userStoryNumber;
-    }
-
-    public void setUserStoryNumber(String userStoryNumber) {
-        this.userStoryNumber = userStoryNumber;
     }
 
     public String getEntityName() {
@@ -94,5 +88,13 @@ public class Input {
 
     public void setGeneralRuleApplied(String generalRuleApplied) {
         this.generalRuleApplied = generalRuleApplied;
+    }
+
+    public String getReasonAdded() {
+        return reasonAdded;
+    }
+
+    public void setReasonAdded(String reasonAdded) {
+        this.reasonAdded = reasonAdded;
     }
 }

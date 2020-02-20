@@ -1,43 +1,68 @@
-//package springapp.datahubaccelerator;
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.CommandLineRunner;
-//import org.springframework.context.annotation.Scope;
-//import org.springframework.stereotype.Component;
-//import springapp.datahubaccelerator.domain.Input;
-//import springapp.datahubaccelerator.domain.repository.InputRepository;
-//import springapp.datahubaccelerator.domain.repository.FieldRepository;
-//
-//import javax.transaction.Transactional;
-//
-//@Component
-//@Scope("singleton")
-//public class Starter implements CommandLineRunner {
-//
-//    @Autowired
-//    InputRepository inputRepository;
-//
-//    @Autowired
-//    FieldRepository fieldRepository;
-//
-//    @Override
-//    @Transactional
-//    public void run(String... args) throws Exception {
-//        Input input = new Input();
-//        input.setId(1);
-//        input.setUserStoryNumber("31319");
-//        input.setEntityName("DiscountTransaction");
-//        input.setTargetExtract(
-//                "DISC_TRANS\r\nDISC_TRANS\r\nDISC_TRANS\r\nDISC_TRANS\r\nDISC_TRANS\r\nDISC_TRANS\r\nDISC_TRANS\r\n" +
-//                        "DISC_TRAN\r\nDISC_TRANS\r\nDISC_TRANS\r\n");
-//        input.setColumnName("DISC_TRANS_KEY (PK)\r\nROW_PROC_DTS (PK)\r\nDISCOUNT_PATTERN_KEY\r\nJOB_KEY\r\n" +
-//                "DISC_BDG_CSTR_KEY\r\nSOURCE_SYSTEM\r\nDED_AMT\r\nDED_AMT_CURR_CD\r\nRES_STATUS_CD\r\nX_SEQ_NO\r\n");
-//        input.setDatatype("varchar(100)\r\ndatetime\r\nvarchar(100)\r\nvarchar(100)\r\nvarchar(100)\r\n" +
-//                "varchar(10)\r\ndecimal(18,2)\r\nvarchar(255)\r\nvarchar(255)\r\ndecimal(19,0)\r\n");
-//        input.setGeneralRuleApplied("General Primary Key Rule 1\r\n\r\nGeneral Foreign Key Rule 1\r\n" +
-//                "General Foreign Key Rule 1\r\nGeneral Foreign Key Rule 1\r\nGeneral Source System Rule 1\r\n" +
-//                "General Number Rule 1\r\nGeneral Rule 1\r\nGeneral Rule 1\r\n\r\n");
-//
-//        fieldRepository.generateField(input);
-//    }
-//}
+package springapp.datahubaccelerator;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+import springapp.datahubaccelerator.domain.Field;
+import springapp.datahubaccelerator.domain.Input;
+import springapp.datahubaccelerator.domain.repository.InputRepository;
+import springapp.datahubaccelerator.domain.repository.FieldRepository;
+import springapp.datahubaccelerator.services.FieldService;
+
+import javax.transaction.Transactional;
+import java.util.Arrays;
+import java.util.List;
+
+@Component
+@Scope("singleton")
+public class Starter implements CommandLineRunner {
+
+    @Autowired
+    InputRepository inputRepository;
+
+    @Autowired
+    FieldRepository fieldRepository;
+
+    @Override
+    @Transactional
+    public void run(String... args) throws Exception {
+
+//        List<String> targetExtractList = Arrays.asList("DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS"
+//                , "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS");
+//        List<String> columnNameList = Arrays.asList("DISC_TRANS_KEY (PK)","ROW_PROC_DTS (PK)","DISCOUNT_PATTERN_KEY",
+//                "JOB_KEY","DISC_BDG_CSTR_KEY","SOURCE_SYSTEM","DED_AMT","DED_AMT_CURR_CD","RES_STATUS_CD", "X_SEQ_NO");
+//        List<String> datatypeList = Arrays.asList("varchar(100)", "datetime", "varchar(100)", "varchar(100)"
+//                , "varchar(100)", "varchar(10)", "decimal(18,2)", "varchar(255)", "varchar(255)", "decimal(19,0)");
+//        List<String> scdTypeList = Arrays.asList("N/A", "N/A", "1", "1", "1", "N/A", "2", "2", "2", "N/A");
+//        List<String> generalRuleAppliedList = Arrays.asList("General Primary Key Rule 1", "", "General Foreign Key Rule 1"
+//                , "General Foreign Key Rule 1", "General Foreign Key Rule 1", "General Source System Rule 1"
+//                , "General Number Rule 1", "General Rule 1", "General Rule 1", "");
+//        List<String> reasonAddedList = Arrays.asList("P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319"
+//                , "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319");
+
+        List<String> targetExtractList = Arrays.asList("DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS", "DISC_TRANS");
+        List<String> columnNameList = Arrays.asList("DISC_TRANS_KEY (PK)", "ROW_PROC_DTS (PK)", "DISCOUNT_PATTERN_KEY", "JOB_KEY", "DISC_BDG_CSTR_KEY", "SOURCE_SYSTEM", "DED_AMT", "DED_AMT_CURR_CD", "RES_STATUS_CD", "X_SEQ_NO");
+        List<String> datatypeList = Arrays.asList("varchar(100)", "datetime", "varchar(100)", "varchar(100)", "varchar(100)", "varchar(10)", "decimal(18,2)", "varchar(255)", "varchar(255)", "decimal(19,0)");
+        List<String> scdTypeList = Arrays.asList("N/A", "N/A", "1", "1", "1", "N/A", "2", "2", "2", "N/A");
+        List<String> generalRuleAppliedList = Arrays.asList("General Primary Key Rule 1", "", "General Foreign Key Rule 1", "General Foreign Key Rule 1", "General Foreign Key Rule 1", "General Source System Rule 1", "General Number Rule 1", "General Rule 1", "General Rule 1", "");
+        List<String> reasonAddedList = Arrays.asList("P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319");
+
+
+        for (int i = 0; i < targetExtractList.size(); i++) {
+            Field field = new Field();
+            field.setTargetExtract(targetExtractList.get(i));
+            field.setColumnName(columnNameList.get(i));
+            field.setDatatype(datatypeList.get(i));
+            field.setScdType(scdTypeList.get(i));
+            try {
+                field.setGeneralRuleApplied(generalRuleAppliedList.get(i));
+            }
+            catch(ArrayIndexOutOfBoundsException e) {
+                field.setGeneralRuleApplied("");
+            }
+            field.setReasonAdded(reasonAddedList.get(i));
+            fieldRepository.saveField(field);
+        }
+    }
+}

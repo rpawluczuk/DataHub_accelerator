@@ -13,10 +13,6 @@
 <div class="container">
     <form class="form-horizontal" th:object="${input}" th:action="@{/rowgenerator}" th:method="post">
         <div class="form-group">
-            <label class="control-label">user story number:</label>
-            <input type="text" class="form-control" th:field="*{userStoryNumber}"/>
-        </div>
-        <div class="form-group">
             <label class="control-label">entity name:</label>
             <input type="text" class="form-control" th:field="*{entityName}"/>
         </div>
@@ -39,6 +35,10 @@
         <div class="form-group">
             <label class="control-label">general rule applied:</label>
             <textarea type="text" class="form-control" th:field="*{generalRuleApplied}"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Reason Added:</label>
+            <textarea type="text" class="form-control" th:field="*{reasonAdded}"/>
         </div>
         <div class="field">
             <button type="submit" class="btn btn-dark">Generate Columns</button>

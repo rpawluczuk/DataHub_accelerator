@@ -24,7 +24,6 @@ public class FieldController {
     public String generateColumns(Model model){
         Input input = inputService.getLastInput();
         fieldService.generateField(input);
-        Field.setUserStoryNumber(input.getUserStoryNumber());
         Field.setEntityName(input.getEntityName());
         List<Field> allFields = fieldService.getAllFields();
         model.addAttribute("fields", allFields);
@@ -39,5 +38,13 @@ public class FieldController {
         String dmlScript = fieldService.generateDMLScript(allFields);
         model.addAttribute("dmlscript", dmlScript);
         return "scriptgenerator";
+    }
+
+    @RequestMapping("/testgenerator")
+    public String generateTest(Model model){
+        List<Field> allFields = fieldService.getAllFields();
+        String testCase = fieldService.generateTest(allFields);
+        model.addAttribute("testcase", testCase);
+        return "testgenerator";
     }
 }

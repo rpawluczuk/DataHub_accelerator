@@ -30,4 +30,12 @@ public class FieldService {
     public String generateDMLScript(List<Field> allFields) {
         return fieldRepository.generateDMLScript(allFields);
     }
+
+    public void addField(Field field) {
+        fieldRepository.saveField(field);
+    }
+
+    public String generateTest(List<Field> allFields) {
+        return fieldRepository.generateTest(allFields);
+    }
 }

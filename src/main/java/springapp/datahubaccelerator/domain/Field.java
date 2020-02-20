@@ -6,13 +6,12 @@ import javax.validation.constraints.NotNull;
 @Entity
 public class Field {
 
-    static final private int COLUMNS_LENGTH = 5000;
+    private static final int COLUMNS_LENGTH = 5000;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    static String userStoryNumber;
     static String entityName;
 
     @Column(length = COLUMNS_LENGTH)
@@ -31,6 +30,9 @@ public class Field {
     @Column(length = COLUMNS_LENGTH)
     String generalRuleApplied;
 
+    @Column(length = COLUMNS_LENGTH)
+    String reasonAdded;
+
     public Field() {
     }
 
@@ -40,14 +42,6 @@ public class Field {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public static String getUserStoryNumber() {
-        return userStoryNumber;
-    }
-
-    public static void setUserStoryNumber(String userStoryNumber) {
-        Field.userStoryNumber = userStoryNumber;
     }
 
     public static String getEntityName() {
@@ -96,5 +90,13 @@ public class Field {
 
     public void setGeneralRuleApplied(String generalRuleApplied) {
         this.generalRuleApplied = generalRuleApplied;
+    }
+
+    public String getReasonAdded() {
+        return reasonAdded;
+    }
+
+    public void setReasonAdded(String reasonAdded) {
+        this.reasonAdded = reasonAdded;
     }
 }
