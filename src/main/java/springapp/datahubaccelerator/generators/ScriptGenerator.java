@@ -106,13 +106,7 @@ public class ScriptGenerator {
     }
 
     public String generateConstraintsPart(List<Field> allFields) {
-        for (Field field : allFields) {
-            field.setColumnName(field.getColumnName().replace("(PK)", "")
-                    .replace("(FK)", "").trim());
-        }
-        List<Field> allKeyFields = allFields.stream()
-                .filter(f -> f.getColumnName().endsWith("KEY"))
-                .collect(Collectors.toList());
+        List<Field> allKeyFields = getKeyFieldsList(allFields);
         String constraintPartScript ="";
         for (Field field : allKeyFields) {
             constraintPartScript = constraintPartScript + generateSingleConstraint(field);
@@ -121,18 +115,24 @@ public class ScriptGenerator {
     }
 
     public String generateIndexesPart(List<Field> allFields) {
-        for (Field field : allFields) {
-            field.setColumnName(field.getColumnName().replace("(PK)", "")
-                    .replace("(FK)", "").trim());
-        }
-        List<Field> allKeyFields = allFields.stream()
-                .filter(f -> f.getColumnName().endsWith("KEY"))
-                .collect(Collectors.toList());
+        List<Field> allKeyFields = getKeyFieldsList(allFields);
         String indexPartScript ="";
         for (Field field : allKeyFields) {
             indexPartScript = indexPartScript + generateSingleIndex(field);
         }
         return "\n/* Indexes */\n" + indexPartScript;
+    }
+
+    public String generateDMLscript(List<Field> allFields) {
+        List<Field> allKeyFields = getKeyFieldsList(allFields);
+        String dmlPartScript ="";
+        for (Field field : allKeyFields) {
+            dmlPartScript = dmlPartScript + generateSingleInsertion(field);
+        }
+        return "/* User Story: P17152-31319_Bde_DiscountTransaction */\n" +
+                "\n" +
+                "/* MD_FK_REF Inserts */" +
+                dmlPartScript;
     }
 
     private String generateRowsForScript(List<Field> allFields, int id) {
@@ -189,6 +189,16 @@ public class ScriptGenerator {
         }
     }
 
+    private List<Field> getKeyFieldsList(List<Field> allFields) {
+        for (Field field : allFields) {
+            field.setColumnName(field.getColumnName().replace("(PK)", "")
+                    .replace("(FK)", "").trim());
+        }
+        return allFields.stream()
+                .filter(f -> f.getColumnName().endsWith("KEY"))
+                .collect(Collectors.toList());
+    }
+
     private String generateSingleConstraint(Field field) {
         String targetExtract = field.getTargetExtract();
         String scdType;
@@ -216,7 +226,7 @@ public class ScriptGenerator {
                 "\tALTER TABLE [dbo].[Z_CS_" + targetExtract + "_" + scdType + "] ADD CONSTRAINT " +
                 "[Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +generateShortcut(foreginField, "BASE") +
                 "] FOREIGN KEY([" + field.getColumnName() + "])\n" +
-                "\tREFERENCES [dbo].[Z_CS_" + foreginField + "_BASE] ([" + field.getColumnName() + ")\n" +
+                "\tREFERENCES [dbo].[Z_CS_" + foreginField + "_BASE] ([" + field.getColumnName() + "])\n" +
                 "END\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][FK] P17152-" +
@@ -253,5 +263,39 @@ public class ScriptGenerator {
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] P17152-" +
                 Field.getUserStoryNumber() +": Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
                 generateShortcut(foreginField, "BASE") + "_XFK'\n";
+    }
+
+    private String generateSingleInsertion(Field field) {
+        String targetExtract = field.getTargetExtract();
+        String scdType;
+        if (field.getScdType().equals("1")){
+            scdType = "BASE";
+        } else {
+            scdType = "DELTA";
+        }
+        String foreginField = field.getColumnName().replace("_KEY", "");
+        return "\n/* Insert MD_FK_REF record: Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
+                generateShortcut(foreginField, "BASE") + " */\n" +
+                "IF (EXISTS (SELECT * \n" +
+                "\t\t\tFROM sys.foreign_keys\n" +
+                "\t\t\tWHERE name = 'Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
+                generateShortcut(foreginField, "BASE") + "')\n" +
+                "\tAND NOT EXISTS (SELECT *\n" +
+                "\t\t\t\t\tFROM MD_FK_REF\n" +
+                "\t\t\t\t\tWHERE FK_CONSTR_NAME = 'Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
+                generateShortcut(foreginField, "BASE") + "')\n" +
+                ")\n" +
+                "BEGIN\n" +
+                "\tINSERT INTO MD_FK_REF(TRF_NAME,FK_TAB_NAME,FK_COL_NAME,PK_TAB_NAME,PK_COL_NAME,LOB_CD,FK_CONSTR_NAME," +
+                "OOTB_FUTURE_USE_FL,MULTI_SRCE_FL,SELF_REF_FL) VALUES " +
+                "('Z_TRF_" + targetExtract + "','Z_CS_" + targetExtract + "_" + scdType + "','" + field.getColumnName() +
+                "','Z_CS_" + foreginField + "_BASE','" +field.getColumnName() + "','All','" +
+                "Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
+                generateShortcut(foreginField, "BASE") + "','N','N','N');\n" +
+                "END\n" +
+                "ELSE\n" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][MD_FK_REF] P17152-" + Field.getUserStoryNumber() +
+                ": Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
+                generateShortcut(foreginField, "BASE") + "'\n";
     }
 }

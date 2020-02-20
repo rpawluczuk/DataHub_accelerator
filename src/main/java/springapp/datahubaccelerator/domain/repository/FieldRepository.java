@@ -60,4 +60,8 @@ public class FieldRepository {
     }
 
 
+    public String generateDMLScript(List<Field> allFields) {
+        ScriptGenerator scriptGenerator = new ScriptGenerator();
+        return scriptGenerator.generateDMLscript(allFields);
+    }
 }

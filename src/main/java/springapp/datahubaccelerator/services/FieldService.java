@@ -26,4 +26,8 @@ public class FieldService {
     public String generateDDLScript(List<Field> allFields) {
         return fieldRepository.generateDDLScript(allFields);
     }
+
+    public String generateDMLScript(List<Field> allFields) {
+        return fieldRepository.generateDMLScript(allFields);
+    }
 }
