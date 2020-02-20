@@ -24,6 +24,9 @@ public class Input {
     String columnName;
 
     @Column(length = COLUMNS_LENGTH)
+    String scdType;
+
+    @Column(length = COLUMNS_LENGTH)
     String generalRuleApplied;
 
     public Input() {
@@ -75,6 +78,14 @@ public class Input {
 
     public void setDatatype(String datatype) {
         this.datatype = datatype;
+    }
+
+    public String getScdType() {
+        return scdType;
+    }
+
+    public void setScdType(String scdType) {
+        this.scdType = scdType;
     }
 
     public String getGeneralRuleApplied() {

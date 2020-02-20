@@ -24,6 +24,9 @@ public class Field {
     @Column(length = COLUMNS_LENGTH)
     String datatype;
 
+    @Column(length = COLUMNS_LENGTH)
+    String scdType;
+
     @NotNull
     @Column(length = COLUMNS_LENGTH)
     String generalRuleApplied;
@@ -77,6 +80,14 @@ public class Field {
 
     public void setDatatype(String datatype) {
         this.datatype = datatype;
+    }
+
+    public String getScdType() {
+        return scdType;
+    }
+
+    public void setScdType(String scdType) {
+        this.scdType = scdType;
     }
 
     public String getGeneralRuleApplied() {

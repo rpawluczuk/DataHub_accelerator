@@ -23,7 +23,7 @@ public class FieldService {
         fieldRepository.generateField(input);
     }
 
-    public String generateScript(List<Field> allFields) {
-        return fieldRepository.generateScript(allFields);
+    public String generateDDLScript(List<Field> allFields) {
+        return fieldRepository.generateDDLScript(allFields);
     }
 }
