@@ -117,8 +117,22 @@ public class ScriptGenerator {
         for (Field field : allKeyFields) {
             constraintPartScript = constraintPartScript + generateSingleConstraint(field);
         }
-
         return "\n/* Constraints */\n" + constraintPartScript;
+    }
+
+    public String generateIndexesPart(List<Field> allFields) {
+        for (Field field : allFields) {
+            field.setColumnName(field.getColumnName().replace("(PK)", "")
+                    .replace("(FK)", "").trim());
+        }
+        List<Field> allKeyFields = allFields.stream()
+                .filter(f -> f.getColumnName().endsWith("KEY"))
+                .collect(Collectors.toList());
+        String indexPartScript ="";
+        for (Field field : allKeyFields) {
+            indexPartScript = indexPartScript + generateSingleIndex(field);
+        }
+        return "\n/* Indexes */\n" + indexPartScript;
     }
 
     private String generateRowsForScript(List<Field> allFields, int id) {
@@ -208,5 +222,36 @@ public class ScriptGenerator {
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][FK] P17152-" +
                 Field.getUserStoryNumber() + ": Z_FK_C" +
                 generateShortcut(targetExtract, scdType) + "_C" + generateShortcut(foreginField, "BASE") + "'\n";
+    }
+
+
+    private String generateSingleIndex(Field field) {
+        String targetExtract = field.getTargetExtract();
+        String scdType;
+        if (field.getScdType().equals("1")){
+            scdType = "BASE";
+        } else {
+            scdType = "DELTA";
+        }
+        String foreginField = field.getColumnName().replace("_KEY", "");
+        return "\nIF (EXISTS (SELECT *\n" +
+                "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
+                "\t\t\tWHERE TABLE_SCHEMA = 'dbo'\n" +
+                "\t\t\tAND TABLE_NAME = 'Z_CS_" + targetExtract + "_" + scdType + "'\n" +
+                "\t\t\tAND COLUMN_NAME = '" + field.getColumnName() + "')\n" +
+                "\tAND NOT EXISTS (SELECT *\n" +
+                "\t\t\t\t\tFROM sys.indexes\n" +
+                "\t\t\t\t\tWHERE name = 'Z_FK_C"  +
+                generateShortcut(targetExtract, scdType) + "_C" + generateShortcut(foreginField, "BASE") + "_XFK')\n" +
+                "\t)\n" +
+                "BEGIN\n" +
+                "\tcreate nonclustered index Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
+                generateShortcut(foreginField, "BASE") + "_XFK on Z_CS_" + targetExtract + "_" + scdType +
+                " (" + field.getColumnName() + " ASC)\n" +
+                "END\n" +
+                "ELSE\n" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] P17152-" +
+                Field.getUserStoryNumber() +": Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
+                generateShortcut(foreginField, "BASE") + "_XFK'\n";
     }
 }

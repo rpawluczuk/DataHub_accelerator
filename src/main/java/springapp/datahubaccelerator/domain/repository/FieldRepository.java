@@ -56,7 +56,7 @@ public class FieldRepository {
                 scriptGenerator.generateODSBasePart(allFields) +
                 scriptGenerator.generateODSDeltaPart(allFields) +
                 scriptGenerator.generateConstraintsPart(allFields) +
-                scriptGenerator.generateConstraintsPart(allFields);
+                scriptGenerator.generateIndexesPart(allFields);
     }
 
 
