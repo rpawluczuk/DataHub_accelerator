@@ -11,6 +11,15 @@ public class ScriptGenerator {
     public ScriptGenerator() {
     }
 
+    String generateEntityName(String targetExtract){
+        String entityName = "";
+        List<String> splitedTargetExtract = Arrays.asList(targetExtract.toLowerCase().split("_"));
+        for (String split : splitedTargetExtract) {
+            entityName = entityName.concat(split.substring(0, 1).toUpperCase() + split.substring(1));
+        }
+        return entityName;
+    }
+
     List<Field> getKeyFieldsList(List<Field> allFields) {
         for (Field field : allFields) {
             field.setColumnName(field.getColumnName().replace("(PK)", "")
@@ -25,7 +34,7 @@ public class ScriptGenerator {
         String rowsForScript = "";
         for (int i = id; i < allFields.size(); i++) {
             rowsForScript = rowsForScript + "[" + allFields.get(i).getColumnName().replace("(PK)","")
-                    .replace("(FK)", "").trim() + "]\t[" + handleDatatype(allFields.get(i).getDatatype()) + "\t" +
+                    .replace("(FK)", "").trim() + "]\t" + allFields.get(i).getDatatype() + "\t" +
                     handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied()) + "\n\t,";
         }
         return rowsForScript;
@@ -57,12 +66,12 @@ public class ScriptGenerator {
         }
     }
 
-    private String handleDatatype(String datatype) {
-        if (datatype.contains("varchar") || datatype.contains("decimal")){
-            return datatype.replace("(", "](");
-        }
-        return datatype +"]";
-    }
+//    private String handleDatatype(String datatype) {
+//        if (datatype.contains("varchar") || datatype.contains("decimal")){
+//            return datatype.replace("(", "](");
+//        }
+//        return datatype +"]";
+//    }
 
     private String handleGeneralRuleApplied(String generalRuleApplied) {
         List<String> rulesThatAllowNull = Arrays.asList("General Rule 5", "General Date Rule 5"

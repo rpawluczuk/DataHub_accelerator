@@ -13,7 +13,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
     public String generateTRFPart(List<Field> allFields) {
         String targetExtract = allFields.get(0).getTargetExtract();
         String userStoryNumber = allFields.get(0).getReasonAdded();
-        return  "/* User Story: P17152-" + userStoryNumber + "_Bde_" + Field.getEntityName() + " */\n" +
+        return  "/* User Story: " + userStoryNumber + "_Bde_" + generateEntityName(targetExtract) + " */\n" +
                 "\n" +
                 "/* TRF Changes */\n" +
                 "IF (NOT EXISTS (SELECT * \n" +
@@ -23,11 +23,11 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "BEGIN\n" +
                 "CREATE TABLE [dbo].[Z_TRF_" + targetExtract + "](\n" +
                 "\t" + generateRowsForScript(allFields, 0) +
-                "[ETL_ROW_EFF_DTS]      [datetime2](7)\tNOT NULL\n" +
+                "[ETL_ROW_EFF_DTS]      datetime2(7)\tNOT NULL\n" +
                 ")\n" +
                 "END\n" +
                 "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][TRF] P17152-" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][TRF] " +
                 userStoryNumber + ": Z_TRF_" + targetExtract + "'";
     }
 
@@ -48,10 +48,10 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 .stream()
                 .filter(x -> !x.getScdType().equals("2"))
                 .collect(Collectors.toList()), 0) +
-                "[ETL_LATE_ARRIVING_SCD]\t[varchar](1)\tNOT NULL\n" +
-                "\t,[ETL_ACTIVE_FL]\t\t\t[varchar](1)\tNOT NULL\n" +
-                "\t,[ETL_ADD_DTS]\t\t\t[datetime2](7)\tNULL\n" +
-                "\t,[ETL_LAST_UPDATE_DTS]\t\t[datetime2](7)\tNOT NULL\n" +
+                "[ETL_LATE_ARRIVING_SCD]\tvarchar(1)\tNOT NULL\n" +
+                "\t,[ETL_ACTIVE_FL]\t\t\tvarchar(1)\tNOT NULL\n" +
+                "\t,[ETL_ADD_DTS]\t\t\tdatetime2(7)\tNULL\n" +
+                "\t,[ETL_LAST_UPDATE_DTS]\t\tdatetime2(7)\tNOT NULL\n" +
                 "CONSTRAINT [Z_C" + generateShortcut(targetExtract, "BASE") + "_PK] PRIMARY KEY NONCLUSTERED \n" +
                 "(\n" +
                 "\t[" + primaryKeyColumnName + "] ASC\n" +
@@ -63,7 +63,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 ")\n" +
                 "END\n" +
                 "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] P17152-" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] " +
                 userStoryNumber + ": Z_CS_" + targetExtract + "_BASE'\n" +
                 "\n";
     }
@@ -79,17 +79,17 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "\tCREATE TABLE [dbo].[Z_CS_" + targetExtract + "_DELTA](\n" +
                 "\t [" + primaryKeyColumnName.replace("KEY", "DID") + "]\t\t[int] IDENTITY(1,1) NOT NULL\n" +
                 "\t,[" + primaryKeyColumnName + "]\t\t[varchar](100)\t\tNOT NULL\n" +
-                "\t,[ETL_ROW_EFF_DTS]\t\t[datetime2](7)\t\tNOT NULL\n" +
-                "\t,[ETL_ROW_EXP_DTS]\t\t[datetime2](7)\t\tNOT NULL\n" +
+                "\t,[ETL_ROW_EFF_DTS]\t\tdatetime2(7)\t\tNOT NULL\n" +
+                "\t,[ETL_ROW_EXP_DTS]\t\tdatetime2(7)\t\tNOT NULL\n" +
                 "\t," + generateRowsForScript(allFields
                 .stream()
                 .filter(x -> !x.getScdType().equals("1"))
                 .collect(Collectors.toList()), 1) +
-                "[ETL_CURR_ROW_FL]\t\t[varchar](1)\t\tNOT NULL\n" +
-                "\t,[ETL_LATE_ARRIVING_FL] [varchar](1)\t\tNOT NULL\n" +
-                "\t,[ETL_ACTIVE_FL]\t\t[varchar](1)\t\tNOT NULL\n" +
-                "\t,[ETL_ADD_DTS]\t\t\t[datetime2](7)\t\tNULL\n" +
-                "\t,[ETL_LAST_UPDATE_DTS]\t[datetime2](7)\t\tNOT NULL\n" +
+                "[ETL_CURR_ROW_FL]\t\tvarchar(1)\t\tNOT NULL\n" +
+                "\t,[ETL_LATE_ARRIVING_FL] varchar(1)\t\tNOT NULL\n" +
+                "\t,[ETL_ACTIVE_FL]\t\tvarchar(1)\t\tNOT NULL\n" +
+                "\t,[ETL_ADD_DTS]\t\t\tdatetime2(7)\t\tNULL\n" +
+                "\t,[ETL_LAST_UPDATE_DTS]\tdatetime2(7)\t\tNOT NULL\n" +
                 " CONSTRAINT [Z_C" + generateShortcut(targetExtract, "DELTA") + "_PK] PRIMARY KEY NONCLUSTERED \n" +
                 "(\n" +
                 "\t[" + primaryKeyColumnName + "] ASC,\n" +
@@ -199,7 +199,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 " (" + field.getColumnName() + " ASC)\n" +
                 "END\n" +
                 "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] P17152-" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] " +
                 userStoryNumber +": Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
                 generateShortcut(foreginField, "BASE") + "_XFK'\n";
     }
@@ -234,7 +234,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 generateShortcut(foreginField, "BASE") + "','N','N','N');\n" +
                 "END\n" +
                 "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][MD_FK_REF] P17152-" + userStoryNumber +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][MD_FK_REF] " + userStoryNumber +
                 ": Z_FK_C" + generateShortcut(targetExtract, scdType) + "_C" +
                 generateShortcut(foreginField, "BASE") + "'\n";
     }

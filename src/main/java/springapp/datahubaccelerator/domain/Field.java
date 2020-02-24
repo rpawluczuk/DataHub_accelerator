@@ -12,26 +12,24 @@ public class Field {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    static String entityName;
+    @Column(length = COLUMNS_LENGTH)
+    private String targetExtract;
 
     @Column(length = COLUMNS_LENGTH)
-    String targetExtract;
+    private String columnName;
 
     @Column(length = COLUMNS_LENGTH)
-    String columnName;
+    private String datatype;
 
     @Column(length = COLUMNS_LENGTH)
-    String datatype;
-
-    @Column(length = COLUMNS_LENGTH)
-    String scdType;
+    private String scdType;
 
     @NotNull
     @Column(length = COLUMNS_LENGTH)
-    String generalRuleApplied;
+    private String generalRuleApplied;
 
     @Column(length = COLUMNS_LENGTH)
-    String reasonAdded;
+    private String reasonAdded;
 
     public Field() {
     }
@@ -42,14 +40,6 @@ public class Field {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public static String getEntityName() {
-        return entityName;
-    }
-
-    public static void setEntityName(String entityName) {
-        Field.entityName = entityName;
     }
 
     public String getTargetExtract() {

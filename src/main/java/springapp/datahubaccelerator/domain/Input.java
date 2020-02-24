@@ -11,25 +11,23 @@ public class Input {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    String entityName;
+    @Column(length = COLUMNS_LENGTH)
+    private String targetExtract;
 
     @Column(length = COLUMNS_LENGTH)
-    String targetExtract;
+    private String datatype;
 
     @Column(length = COLUMNS_LENGTH)
-    String datatype;
+    private String columnName;
 
     @Column(length = COLUMNS_LENGTH)
-    String columnName;
+    private String scdType;
 
     @Column(length = COLUMNS_LENGTH)
-    String scdType;
+    private String generalRuleApplied;
 
     @Column(length = COLUMNS_LENGTH)
-    String generalRuleApplied;
-
-    @Column(length = COLUMNS_LENGTH)
-    String reasonAdded;
+    private String reasonAdded;
 
     public Input() {
     }
@@ -40,14 +38,6 @@ public class Input {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getEntityName() {
-        return entityName;
-    }
-
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
     }
 
     public String getTargetExtract() {

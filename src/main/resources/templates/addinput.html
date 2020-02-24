@@ -13,32 +13,28 @@
 <div class="container">
     <form class="form-horizontal" th:object="${input}" th:action="@{/rowgenerator}" th:method="post">
         <div class="form-group">
-            <label class="control-label">entity name:</label>
-            <input type="text" class="form-control" th:field="*{entityName}"/>
-        </div>
-        <div class="form-group">
             <label class="control-label">target extract:</label>
-            <textarea type="text" class="form-control" th:field="*{targetExtract}"/>
+            <textarea type="text" class="form-control" th:field="*{targetExtract}"></textarea>
         </div>
         <div class="form-group">
             <label class="control-label">column name:</label>
-            <textarea type="text" class="form-control" th:field="*{columnName}"/>
+            <textarea type="text" class="form-control" th:field="*{columnName}"></textarea>
         </div>
         <div class="form-group">
             <label class="control-label">datatype:</label>
-            <textarea type="text" class="form-control" th:field="*{datatype}"/>
+            <textarea type="text" class="form-control" th:field="*{datatype}"></textarea>
         </div>
         <div class="form-group">
             <label class="control-label">SCD type:</label>
-            <textarea type="text" class="form-control" th:field="*{scdType}"/>
+            <textarea type="text" class="form-control" th:field="*{scdType}"></textarea>
         </div>
         <div class="form-group">
             <label class="control-label">general rule applied:</label>
-            <textarea type="text" class="form-control" th:field="*{generalRuleApplied}"/>
+            <textarea type="text" class="form-control" th:field="*{generalRuleApplied}"></textarea>
         </div>
         <div class="form-group">
             <label class="control-label">Reason Added:</label>
-            <textarea type="text" class="form-control" th:field="*{reasonAdded}"/>
+            <textarea type="text" class="form-control" th:field="*{reasonAdded}"></textarea>
         </div>
         <div class="field">
             <button type="submit" class="btn btn-dark">Generate Columns</button>
