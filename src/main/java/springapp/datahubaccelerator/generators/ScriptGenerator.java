@@ -40,6 +40,15 @@ public class ScriptGenerator {
         return rowsForScript;
     }
 
+    String listingOfColumnNames(List<Field> newFields, int id) {
+        String listingForScript = "";
+        for (int i = id; i < newFields.size(); i++) {
+            listingForScript = listingForScript + newFields.get(i).getColumnName().replace("(PK)","")
+                    .replace("(FK)", "").trim() + "\n\t\t\t\t\t,";
+        }
+        return listingForScript;
+    }
+
     String generateShortcut(String targetExtract, String scdType) {
         if (targetExtract.equals("ETL_LAST_UPDATE_DTS")){
             return "XUPDT";

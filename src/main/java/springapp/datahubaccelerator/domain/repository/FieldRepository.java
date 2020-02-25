@@ -69,8 +69,7 @@ public class FieldRepository {
                     scriptGeneratorForCreatingEntitiesPCCC.generateDDLScript()
                     ,scriptGeneratorForCreatingEntitiesPCCC.generateDMLScript());
         } else {
-            return Arrays.asList("in progress", "in progress");
-//                    scriptGeneratorForEditingEntitiesPCCC.generateDDLScript(allFields)
+            return Arrays.asList(scriptGeneratorForEditingEntitiesPCCC.generateDDLScript(), "in progress");
 //                    ,scriptGeneratorForEditingEntitiesPCCC.generateDMLScript(allFields));
         }
     }

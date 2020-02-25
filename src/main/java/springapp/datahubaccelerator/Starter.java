@@ -38,8 +38,8 @@ public class Starter implements CommandLineRunner {
         List<String> generalRuleAppliedList = Arrays.asList("General Primary Key Rule 1", "", "General Foreign Key Rule 1"
                 , "General Foreign Key Rule 1", "General Foreign Key Rule 1", "General Source System Rule 1"
                 , "General Number Rule 1", "General Rule 1", "General Rule 1", "");
-        List<String> reasonAddedList = Arrays.asList("P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319"
-                , "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319");
+        List<String> reasonAddedList = Arrays.asList("P17152-31319", "P17152-31320", "P17152-31319", "P17152-31319"
+                , "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31319", "P17152-31320", "P17152-31320");
 
 
         for (int i = 0; i < targetExtractList.size(); i++) {
