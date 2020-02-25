@@ -23,12 +23,8 @@ public class FieldService {
         fieldRepository.generateField(input);
     }
 
-    public String generateDDLScript(List<Field> allFields) {
-        return fieldRepository.generateDDLScript(allFields);
-    }
-
-    public String generateDMLScript(List<Field> allFields) {
-        return fieldRepository.generateDMLScript(allFields);
+    public List<String> generateScripts(List<Field> allFields) {
+        return fieldRepository.generateScripts(allFields);
     }
 
     public void addField(Field field) {
@@ -37,5 +33,9 @@ public class FieldService {
 
     public String generateTest(List<Field> allFields) {
         return fieldRepository.generateTest(allFields);
+    }
+
+    public boolean isNewEntity(List<Field> allFields) {
+        return fieldRepository.isNewEntity(allFields);
     }
 }

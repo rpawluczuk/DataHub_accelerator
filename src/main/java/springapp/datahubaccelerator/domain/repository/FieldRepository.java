@@ -4,10 +4,12 @@ import org.springframework.stereotype.Repository;
 import springapp.datahubaccelerator.domain.Field;
 import springapp.datahubaccelerator.domain.Input;
 import springapp.datahubaccelerator.generators.ScriptGeneratorForCreatingEntitiesPCCC;
+import springapp.datahubaccelerator.generators.ScriptGeneratorForEditingEntitiesPCCC;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,19 +59,28 @@ public class FieldRepository {
         saveField(field);
     }
 
-    public String generateDDLScript(List<Field> allFields) {
-        ScriptGeneratorForCreatingEntitiesPCCC scriptGeneratorForCreatingEntitiesPCCC = new ScriptGeneratorForCreatingEntitiesPCCC();
-        return scriptGeneratorForCreatingEntitiesPCCC.generateTRFPart(allFields) +
-                scriptGeneratorForCreatingEntitiesPCCC.generateODSBasePart(allFields) +
-                scriptGeneratorForCreatingEntitiesPCCC.generateODSDeltaPart(allFields) +
-                scriptGeneratorForCreatingEntitiesPCCC.generateConstraintsPart(allFields) +
-                scriptGeneratorForCreatingEntitiesPCCC.generateIndexesPart(allFields);
+    public List<String> generateScripts(List<Field> allFields) {
+        ScriptGeneratorForCreatingEntitiesPCCC scriptGeneratorForCreatingEntitiesPCCC =
+                new ScriptGeneratorForCreatingEntitiesPCCC(allFields);
+        ScriptGeneratorForEditingEntitiesPCCC scriptGeneratorForEditingEntitiesPCCC =
+                new ScriptGeneratorForEditingEntitiesPCCC(allFields);
+        if (isNewEntity(allFields)){
+            return Arrays.asList(
+                    scriptGeneratorForCreatingEntitiesPCCC.generateDDLScript()
+                    ,scriptGeneratorForCreatingEntitiesPCCC.generateDMLScript());
+        } else {
+            return Arrays.asList("in progress", "in progress");
+//                    scriptGeneratorForEditingEntitiesPCCC.generateDDLScript(allFields)
+//                    ,scriptGeneratorForEditingEntitiesPCCC.generateDMLScript(allFields));
+        }
     }
 
-
-    public String generateDMLScript(List<Field> allFields) {
-        ScriptGeneratorForCreatingEntitiesPCCC scriptGeneratorForCreatingEntitiesPCCC = new ScriptGeneratorForCreatingEntitiesPCCC();
-        return scriptGeneratorForCreatingEntitiesPCCC.generateDMLscript(allFields);
+    public boolean isNewEntity(List<Field> allFields) {
+        for (Field field : allFields) {
+            if(!field.getReasonAdded().equals(allFields.get(0).getReasonAdded()))
+                return false;
+        }
+        return true;
     }
 
     public String generateTest(List<Field> allFields) {

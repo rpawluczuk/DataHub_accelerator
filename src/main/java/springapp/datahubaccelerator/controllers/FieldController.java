@@ -32,10 +32,10 @@ public class FieldController {
     @RequestMapping("/scriptgenerator")
     public String generateScript(Model model){
         List<Field> allFields = fieldService.getAllFields();
-        String ddlScript = fieldService.generateDDLScript(allFields);
-        model.addAttribute("ddlscript", ddlScript);
-        String dmlScript = fieldService.generateDMLScript(allFields);
-        model.addAttribute("dmlscript", dmlScript);
+            String ddlScript = fieldService.generateScripts(allFields).get(0);
+            model.addAttribute("ddlscript", ddlScript);
+            String dmlScript = fieldService.generateScripts(allFields).get(1);
+            model.addAttribute("dmlscript", dmlScript);
         return "scriptgenerator";
     }
 

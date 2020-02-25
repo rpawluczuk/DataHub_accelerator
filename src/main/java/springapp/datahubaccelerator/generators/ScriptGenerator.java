@@ -41,6 +41,9 @@ public class ScriptGenerator {
     }
 
     String generateShortcut(String targetExtract, String scdType) {
+        if (targetExtract.equals("ETL_LAST_UPDATE_DTS")){
+            return "XUPDT";
+        }
         if (targetExtract.toUpperCase().startsWith("BDE")){
             targetExtract = targetExtract.substring(3);
         } else if (targetExtract.toUpperCase().endsWith("BDE")){
@@ -52,17 +55,17 @@ public class ScriptGenerator {
             targetExtract = targetExtract.substring(0, targetExtract.length() - 1);
         }
         if (targetExtract.contains("_")){
-            return Arrays.asList(targetExtract.split("_")).stream()
+            return "C" + Arrays.asList(targetExtract.split("_")).stream()
                     .map(x -> x.charAt(0) + "")
                     .collect(Collectors.joining()) + scdType.charAt(0);
         } else if (targetExtract.matches("\\w*[a-z]\\w*") && targetExtract.matches("\\w*[A-Z]\\w*")){
-            return targetExtract.chars()
+            return "C" + targetExtract.chars()
                     .mapToObj(x -> (char) x)
                     .filter(ch -> Character.isUpperCase(ch))
                     .map(x -> x + "")
                     .collect(Collectors.joining()) + scdType.charAt(0);
         } else {
-            return targetExtract.toUpperCase().substring(0, 2) + scdType.charAt(0);
+            return "C" + targetExtract.toUpperCase().substring(0, 2) + scdType.charAt(0);
         }
     }
 
