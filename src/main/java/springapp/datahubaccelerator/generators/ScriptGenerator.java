@@ -43,8 +43,8 @@ public class ScriptGenerator {
     String listingOfColumnNames(List<Field> newFields, int id) {
         String listingForScript = "";
         for (int i = id; i < newFields.size(); i++) {
-            listingForScript = listingForScript + newFields.get(i).getColumnName().replace("(PK)","")
-                    .replace("(FK)", "").trim() + "\n\t\t\t\t\t,";
+            listingForScript = listingForScript + "\n\t\t\t\t\t,'" + newFields.get(i).getColumnName().replace("(PK)","")
+                    .replace("(FK)", "").trim() + "'";
         }
         return listingForScript;
     }
