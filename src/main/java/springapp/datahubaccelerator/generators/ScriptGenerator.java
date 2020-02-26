@@ -33,9 +33,15 @@ public class ScriptGenerator {
     String generateRowsForScript(List<Field> allFields, int id) {
         String rowsForScript = "";
         for (int i = id; i < allFields.size(); i++) {
-            rowsForScript = rowsForScript + "[" + allFields.get(i).getColumnName().replace("(PK)","")
-                    .replace("(FK)", "").trim() + "]\t" + allFields.get(i).getDatatype() + "\t" +
-                    handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied()) + "\n\t,";
+            if (i == 0){
+                rowsForScript = rowsForScript + "\n\t[" + allFields.get(i).getColumnName().replace("(PK)","")
+                        .replace("(FK)", "").trim() + "]\t" + allFields.get(i).getDatatype() + "\t" +
+                        handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied());
+            } else {
+                rowsForScript = rowsForScript + "\n\t,[" + allFields.get(i).getColumnName().replace("(PK)", "")
+                        .replace("(FK)", "").trim() + "]\t" + allFields.get(i).getDatatype() + "\t" +
+                        handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied());
+            }
         }
         return rowsForScript;
     }
@@ -43,8 +49,13 @@ public class ScriptGenerator {
     String listingOfColumnNames(List<Field> newFields, int id) {
         String listingForScript = "";
         for (int i = id; i < newFields.size(); i++) {
-            listingForScript = listingForScript + "\n\t\t\t\t\t,'" + newFields.get(i).getColumnName().replace("(PK)","")
-                    .replace("(FK)", "").trim() + "'";
+            if (i == 0){
+                listingForScript = listingForScript + "\n\t\t\t\t\t'" +newFields.get(i).getColumnName().replace("(PK)","")
+                        .replace("(FK)", "").trim() + "'";
+            } else {
+                listingForScript = listingForScript + "\n\t\t\t\t\t,'" + newFields.get(i).getColumnName().replace("(PK)","")
+                        .replace("(FK)", "").trim() + "'";
+            }
         }
         return listingForScript;
     }
