@@ -15,8 +15,8 @@ public class FieldService {
     @Autowired
     FieldRepository fieldRepository;
 
-    public ArrayList<Field> getAllFields(){
-        return new ArrayList<Field>(fieldRepository.getAllFields());
+    public ArrayList<Field> getAllFields(Integer inputId){
+        return new ArrayList<Field>(fieldRepository.getAllFields(inputId));
     }
 
     public void generateField(Input input) {
@@ -27,8 +27,12 @@ public class FieldService {
         return fieldRepository.generateScripts(allFields);
     }
 
-    public void addField(Field field) {
+    public void saveField(Field field) {
         fieldRepository.saveField(field);
+    }
+
+    public void deleteField(Field field) {
+        fieldRepository.deleteField(field);
     }
 
     public String generateTest(List<Field> allFields) {

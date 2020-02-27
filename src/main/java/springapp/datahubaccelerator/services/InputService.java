@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import springapp.datahubaccelerator.domain.Input;
 import springapp.datahubaccelerator.domain.repository.InputRepository;
 
+import javax.transaction.Transactional;
+import java.util.List;
+
 @Service
 public class InputService {
 
@@ -17,5 +20,13 @@ public class InputService {
 
     public Input getLastInput() {
         return inputRepository.getLastInput();
+    }
+
+    public List<Input> getAllInputs() {
+        return inputRepository.getAllInputs();
+    }
+
+    public void deleteInput(Input input) {
+        inputRepository.deleteInput(input);
     }
 }

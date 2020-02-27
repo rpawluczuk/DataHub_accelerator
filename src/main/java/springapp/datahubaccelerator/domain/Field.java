@@ -31,6 +31,9 @@ public class Field {
     @Column(length = COLUMNS_LENGTH)
     private String reasonAdded;
 
+    @ManyToOne
+    private Input input;
+
     public Field() {
     }
 
@@ -88,5 +91,13 @@ public class Field {
 
     public void setReasonAdded(String reasonAdded) {
         this.reasonAdded = reasonAdded;
+    }
+
+    public Input getInput() {
+        return input;
+    }
+
+    public void setInput(Input input) {
+        this.input = input;
     }
 }

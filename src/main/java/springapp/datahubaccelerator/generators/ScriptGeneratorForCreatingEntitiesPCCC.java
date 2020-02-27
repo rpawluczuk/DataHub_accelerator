@@ -48,7 +48,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
                 "\t\t\tAND  TABLE_NAME = 'Z_TRF_" + targetExtract +"'))\n" +
                 "BEGIN\n" +
-                "CREATE TABLE [dbo].[Z_TRF_" + targetExtract + "](\n" +
+                "CREATE TABLE [dbo].[Z_TRF_" + targetExtract + "](" +
                 "\t" + generateRowsForScript(allFields, 0) +
                 "[ETL_ROW_EFF_DTS]      datetime2(7)\tNOT NULL\n" +
                 ")\n" +
@@ -71,6 +71,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "\t," + generateRowsForScript(allFields
                 .stream()
                 .filter(x -> !x.getScdType().equals("2"))
+                .filter(x -> x.getColumnName().equals("ROW_PROC_DTS") || x.getColumnName().equals("X_SEQ_NO"))
                 .collect(Collectors.toList()), 0) +
                 "[ETL_LATE_ARRIVING_SCD]\tvarchar(1)\tNOT NULL\n" +
                 "\t,[ETL_ACTIVE_FL]\t\t\tvarchar(1)\tNOT NULL\n" +
@@ -103,9 +104,8 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "\t [" + primaryKeyColumnName.replace("KEY", "DID") + "]\t\tint IDENTITY(1,1) NOT NULL\n" +
                 "\t,[" + primaryKeyColumnName + "]\t\tvarchar(100)\t\tNOT NULL\n" +
                 "\t,[ETL_ROW_EFF_DTS]\t\tdatetime2(7)\t\tNOT NULL\n" +
-                "\t,[ETL_ROW_EXP_DTS]\t\tdatetime2(7)\t\tNOT NULL\n" +
-                "\t," + generateRowsForScript(allFields
-                .stream()
+                "\t,[ETL_ROW_EXP_DTS]\t\tdatetime2(7)\t\tNOT NULL" +
+                generateRowsForScript(allFields.stream()
                 .filter(x -> !x.getScdType().equals("1"))
                 .collect(Collectors.toList()), 1) +
                 "[ETL_CURR_ROW_FL]\t\tvarchar(1)\t\tNOT NULL\n" +

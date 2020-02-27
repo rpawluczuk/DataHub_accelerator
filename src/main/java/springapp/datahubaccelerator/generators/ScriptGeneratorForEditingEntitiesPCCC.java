@@ -38,6 +38,18 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 generateIndexesPart();
     }
 
+    public String generateDMLScript() {
+        List<Field> allKeyFields = getKeyFieldsList(newFields);
+        String dmlPartScript ="";
+        for (Field field : allKeyFields) {
+            dmlPartScript = dmlPartScript + generateSingleInsertion(field);
+        }
+        return "/* User Story: " + userStoryNumber + "_Bde_" + generateEntityName(targetExtract) + " */\n" +
+                "\n" +
+                "/* MD_FK_REF Inserts */" +
+                dmlPartScript;
+    }
+
     private String generateTRFPart() {
         return "/* User Story: P17152_" +  userStoryNumber + "_" + targetExtract + " */\n" +
                 "\n" +
@@ -194,5 +206,38 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] " +
                 userStoryNumber +": Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
                 generateShortcut(foreginField, "BASE") + "_XFK'\n";
+    }
+
+    private String generateSingleInsertion(Field field) {
+        String scdType;
+        if (field.getScdType().equals("1")){
+            scdType = "BASE";
+        } else {
+            scdType = "DELTA";
+        }
+        String foreginField = field.getColumnName().replace("_KEY", "");
+        return "\n/* Insert MD_FK_REF record: Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
+                generateShortcut(foreginField, "BASE") + " */\n" +
+                "IF (EXISTS (SELECT * \n" +
+                "\t\t\tFROM sys.foreign_keys\n" +
+                "\t\t\tWHERE name = 'Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
+                generateShortcut(foreginField, "BASE") + "')\n" +
+                "\tAND NOT EXISTS (SELECT *\n" +
+                "\t\t\t\t\tFROM MD_FK_REF\n" +
+                "\t\t\t\t\tWHERE FK_CONSTR_NAME = 'Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
+                generateShortcut(foreginField, "BASE") + "')\n" +
+                ")\n" +
+                "BEGIN\n" +
+                "\tINSERT INTO MD_FK_REF(TRF_NAME,FK_TAB_NAME,FK_COL_NAME,PK_TAB_NAME,PK_COL_NAME,LOB_CD,FK_CONSTR_NAME," +
+                "OOTB_FUTURE_USE_FL,MULTI_SRCE_FL,SELF_REF_FL) VALUES " +
+                "('Z_TRF_" + targetExtract + "','Z_CS_" + targetExtract + "_" + scdType + "','" + field.getColumnName() +
+                "','Z_CS_" + foreginField + "_BASE','" +field.getColumnName() + "','All','" +
+                "Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
+                generateShortcut(foreginField, "BASE") + "','N','N','N');\n" +
+                "END\n" +
+                "ELSE\n" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][MD_FK_REF] " + userStoryNumber +
+                ": Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
+                generateShortcut(foreginField, "BASE") + "'\n";
     }
 }

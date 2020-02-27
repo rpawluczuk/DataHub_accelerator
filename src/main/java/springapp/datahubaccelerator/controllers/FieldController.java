@@ -21,27 +21,32 @@ public class FieldController {
     FieldService fieldService;
 
     @RequestMapping("/rowgenerator")
-    public String generateColumns(Model model){
+    public String generateColumns(Model model) {
         Input input = inputService.getLastInput();
+        Integer inputId = input.getId();
         fieldService.generateField(input);
-        List<Field> allFields = fieldService.getAllFields();
+        List<Field> allFields = fieldService.getAllFields(inputId);
         model.addAttribute("fields", allFields);
         return "rowgenerator";
     }
 
     @RequestMapping("/scriptgenerator")
-    public String generateScript(Model model){
-        List<Field> allFields = fieldService.getAllFields();
-            String ddlScript = fieldService.generateScripts(allFields).get(0);
-            model.addAttribute("ddlscript", ddlScript);
-            String dmlScript = fieldService.generateScripts(allFields).get(1);
-            model.addAttribute("dmlscript", dmlScript);
+    public String generateScript(Model model) {
+        Input input = inputService.getLastInput();
+        Integer inputId = input.getId();
+        List<Field> allFields = fieldService.getAllFields(inputId);
+        String ddlScript = fieldService.generateScripts(allFields).get(0);
+        model.addAttribute("ddlscript", ddlScript);
+        String dmlScript = fieldService.generateScripts(allFields).get(1);
+        model.addAttribute("dmlscript", dmlScript);
         return "scriptgenerator";
     }
 
     @RequestMapping("/testgenerator")
-    public String generateTest(Model model){
-        List<Field> allFields = fieldService.getAllFields();
+    public String generateTest(Model model) {
+        Input input = inputService.getLastInput();
+        Integer inputId = input.getId();
+        List<Field> allFields = fieldService.getAllFields(inputId);
         String testCase = fieldService.generateTest(allFields);
         model.addAttribute("testcase", testCase);
         return "testgenerator";

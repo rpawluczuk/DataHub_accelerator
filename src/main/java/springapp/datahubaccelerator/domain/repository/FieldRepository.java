@@ -9,10 +9,9 @@ import springapp.datahubaccelerator.generators.ScriptGeneratorForEditingEntities
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class FieldRepository {
@@ -25,8 +24,14 @@ public class FieldRepository {
         entityManager.merge(field);
     }
 
-    public List<Field> getAllFields() {
-        return entityManager.createQuery("from Field", Field.class).getResultList();
+    @Transactional
+    public void deleteField(Field field) {
+        entityManager.remove(field);
+    }
+
+    public List<Field> getAllFields(Integer inputId) {
+        return entityManager.createQuery("from Field", Field.class).getResultList().stream()
+                .filter(f -> f.getInput().getId().equals(inputId)).collect(Collectors.toList());
     }
 
     @Transactional
@@ -39,6 +44,7 @@ public class FieldRepository {
         List<String> reasonAddedList = Arrays.asList(input.getReasonAdded().split("\r\n"));
         for (int i = 0; i < targetExtractList.size(); i++) {
             Field field = new Field();
+            field.setInput(input);
             field.setTargetExtract(targetExtractList.get(i));
             field.setColumnName(columnNameList.get(i));
             field.setDatatype(datatypeList.get(i));
@@ -69,8 +75,8 @@ public class FieldRepository {
                     scriptGeneratorForCreatingEntitiesPCCC.generateDDLScript()
                     ,scriptGeneratorForCreatingEntitiesPCCC.generateDMLScript());
         } else {
-            return Arrays.asList(scriptGeneratorForEditingEntitiesPCCC.generateDDLScript(), "in progress");
-//                    ,scriptGeneratorForEditingEntitiesPCCC.generateDMLScript(allFields));
+            return Arrays.asList(scriptGeneratorForEditingEntitiesPCCC.generateDDLScript()
+                    ,scriptGeneratorForEditingEntitiesPCCC.generateDMLScript());
         }
     }
 
