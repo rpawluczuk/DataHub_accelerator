@@ -3,13 +3,20 @@ package springapp.datahubaccelerator.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import springapp.datahubaccelerator.domain.Field;
 import springapp.datahubaccelerator.domain.Input;
+import springapp.datahubaccelerator.generators.ScriptGenerator;
 import springapp.datahubaccelerator.services.InputService;
 import springapp.datahubaccelerator.services.FieldService;
 
+import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class FieldController {
@@ -28,6 +35,36 @@ public class FieldController {
         List<Field> allFields = fieldService.getAllFields(inputId);
         model.addAttribute("fields", allFields);
         return "rowgenerator";
+    }
+
+    @RequestMapping("/keyfields")
+    public String checkJoinedTables(Model model) {
+        Integer inputId = inputService.getLastInput().getId();
+        List<Field> allFields = fieldService.getAllFields(inputId);
+        List<Field> keyFields = allFields.stream().filter(f -> f.getJoinedTable()!=null).collect(Collectors.toList());
+        model.addAttribute("keyfields", keyFields);
+        return "keyfields";
+    }
+
+    @RequestMapping("/keyfields/edit/{id}")
+    public String editKeyField(@PathVariable("id") Integer id, Model model) {
+        Field keyFieldToEdit = fieldService.getField(id);
+        model.addAttribute("keyfield", keyFieldToEdit);
+        return "editkeyfield";
+    }
+
+    @RequestMapping(value = "/keyfields", method = RequestMethod.POST)
+    public String saveKeyField(@Valid @ModelAttribute("keyfield") Field keyField, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()){
+            System.out.println("There were errors");
+            bindingResult.getAllErrors().forEach(error -> {
+                System.out.println(error.getObjectName() + " " + error.getDefaultMessage());
+            });
+            return "editkeyfield";
+        } else {
+            fieldService.saveField(keyField);
+            return "redirect:/keyfields";
+        }
     }
 
     @RequestMapping("/scriptgenerator")

@@ -42,4 +42,8 @@ public class FieldService {
     public boolean isNewEntity(List<Field> allFields) {
         return fieldRepository.isNewEntity(allFields);
     }
+
+    public Field getField(Integer id) {
+        return fieldRepository.getField(id);
+    }
 }

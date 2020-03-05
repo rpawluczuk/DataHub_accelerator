@@ -20,7 +20,7 @@ public class ScriptGenerator {
         return entityName;
     }
 
-    List<Field> getKeyFieldsList(List<Field> allFields) {
+    public static List<Field> getKeyFieldsList(List<Field> allFields) {
         for (Field field : allFields) {
             field.setColumnName(field.getColumnName().replace("(PK)", "")
                     .replace("(FK)", "").trim());
@@ -30,18 +30,17 @@ public class ScriptGenerator {
                 .collect(Collectors.toList());
     }
 
+    public static String generateJoinedTableName(String columnName) {
+        return "Z_CS_" + columnName.replace("_KEY", "")
+                .replace("(PK)", "").trim() + "_BASE";
+    }
+
     String generateRowsForScript(List<Field> allFields, int id) {
         String rowsForScript = "";
         for (int i = id; i < allFields.size(); i++) {
-            if (i == 0){
-                rowsForScript = rowsForScript + "\n\t[" + allFields.get(i).getColumnName().replace("(PK)","")
+                rowsForScript = rowsForScript + "[" + allFields.get(i).getColumnName().replace("(PK)", "")
                         .replace("(FK)", "").trim() + "]\t" + allFields.get(i).getDatatype() + "\t" +
-                        handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied());
-            } else {
-                rowsForScript = rowsForScript + "\n\t,[" + allFields.get(i).getColumnName().replace("(PK)", "")
-                        .replace("(FK)", "").trim() + "]\t" + allFields.get(i).getDatatype() + "\t" +
-                        handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied());
-            }
+                        handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied()) + "\n\t,";
         }
         return rowsForScript;
     }

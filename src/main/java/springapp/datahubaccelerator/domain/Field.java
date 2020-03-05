@@ -31,6 +31,8 @@ public class Field {
     @Column(length = COLUMNS_LENGTH)
     private String reasonAdded;
 
+    private String joinedTable;
+
     @ManyToOne
     private Input input;
 
@@ -91,6 +93,14 @@ public class Field {
 
     public void setReasonAdded(String reasonAdded) {
         this.reasonAdded = reasonAdded;
+    }
+
+    public String getJoinedTable() {
+        return joinedTable;
+    }
+
+    public void setJoinedTable(String joinedTable) {
+        this.joinedTable = joinedTable;
     }
 
     public Input getInput() {

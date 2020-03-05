@@ -3,6 +3,7 @@ package springapp.datahubaccelerator.domain.repository;
 import org.springframework.stereotype.Repository;
 import springapp.datahubaccelerator.domain.Field;
 import springapp.datahubaccelerator.domain.Input;
+import springapp.datahubaccelerator.generators.ScriptGenerator;
 import springapp.datahubaccelerator.generators.ScriptGeneratorForCreatingEntitiesPCCC;
 import springapp.datahubaccelerator.generators.ScriptGeneratorForEditingEntitiesPCCC;
 
@@ -56,6 +57,11 @@ public class FieldRepository {
                 field.setGeneralRuleApplied("");
             }
             field.setReasonAdded(reasonAddedList.get(i));
+            if (columnNameList.get(i).contains("KEY")){
+                String columnName = columnNameList.get(i).replace("(FK)", "").trim();
+                String joinedTable = ScriptGenerator.generateJoinedTableName(columnName);
+                field.setJoinedTable(joinedTable);
+            }
             saveField(field);
         }
     }
@@ -109,5 +115,9 @@ public class FieldRepository {
                 scdTypeList.replace("\"\"", "\", \"")  + ");\n" +
                 generalRuleAppliedList.replace("\"\"", "\", \"")  + ");\n" +
                 reasonAddedList.replace("\"\"", "\", \"")  + ");";
+    }
+
+    public Field getField(Integer id) {
+        return entityManager.find(Field.class, id);
     }
 }

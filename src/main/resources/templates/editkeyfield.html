@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Key Field</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1/css/bootstrap.min.css}"/>
+
+    <script th:src="@{/webjars/jquery/3.2.1/jquery.min.css}"></script>
+    <script th:src="@{/webjars/bootstrap/4.4.1/js/bootstrap.min.js}"></script>
+</head>
+<body>
+<div class="container">
+    <form class="form-horizontal" th:object="${keyfield}" th:action="@{/keyfields}" th:method="post">
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" th:field="*{targetExtract}">
+        <input type="hidden" th:field="*{datatype}">
+        <input type="hidden" th:field="*{scdType}">
+        <input type="hidden" th:field="*{generalRuleApplied}">
+        <input type="hidden" th:field="*{reasonAdded}">
+        <input type="hidden" th:field="*{input}">
+        <div class="form-group">
+            <label class="control-label">Column Name:</label>
+            <input type="text" class="form-control" th:field="*{columnName}"/>
+            <p th:if="${#fields.hasErrors('columnName')}" th:errors="*{columnName}"></p>
+        </div>
+        <div class="form-group">
+            <label class="control-label">description:</label>
+            <input type="text" class="form-control" th:field="*{joinedTable}"/>
+            <p th:if="${#fields.hasErrors('joinedTable')}" th:errors="*{joinedTable}"></p>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-dark">Update Joined Table Name</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

@@ -35,4 +35,8 @@ public class InputRepository {
     public void deleteInput(Input input) {
         entityManager.remove(input);
     }
+
+    public Input getInput(Integer id) {
+        return entityManager.find(Input.class, id);
+    }
 }
