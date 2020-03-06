@@ -16,7 +16,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
         this.allFields = allFields;
         this.targetExtract = allFields.get(0).getTargetExtract();
         this.userStoryNumber = allFields.get(0).getReasonAdded();
-        this.primaryKeyColumnName = allFields.get(0).getColumnName().replace("(PK)", "").trim();
+        this.primaryKeyColumnName = allFields.get(0).getColumnName();
     }
 
     public String generateDDLScript() {
@@ -49,7 +49,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "\t\t\tAND  TABLE_NAME = 'Z_TRF_" + targetExtract + "'))\n" +
                 "BEGIN\n" +
                 "CREATE TABLE [dbo].[Z_TRF_" + targetExtract + "](" +
-                "\t" + generateRowsForScript(allFields, 0) +
+                "\n\t" + generateRowsForScript(allFields, 0) +
                 "[ETL_ROW_EFF_DTS]      datetime2(7)\tNOT NULL\n" +
                 ")\n" +
                 "END\n" +

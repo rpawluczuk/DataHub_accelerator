@@ -20,6 +20,14 @@ public class ScriptGenerator {
         return entityName;
     }
 
+    public static Integer getNewestUserStoryNumber(List<Field> allFields) {
+        return allFields.stream()
+                .filter(f -> !f.getReasonAdded().toUpperCase().equals("BASE"))
+                .map(f -> f.getReasonAdded().replace("P17152-", ""))
+                .map(s -> Integer.valueOf(s))
+                .max(Integer::compare).get();
+    }
+
     public static List<Field> getKeyFieldsList(List<Field> allFields) {
         for (Field field : allFields) {
             field.setColumnName(field.getColumnName().replace("(PK)", "")
@@ -32,14 +40,13 @@ public class ScriptGenerator {
 
     public static String generateJoinedTableName(String columnName) {
         return "Z_CS_" + columnName.replace("_KEY", "")
-                .replace("(PK)", "").trim() + "_BASE";
+                .trim() + "_BASE";
     }
 
     String generateRowsForScript(List<Field> allFields, int id) {
         String rowsForScript = "";
         for (int i = id; i < allFields.size(); i++) {
-                rowsForScript = rowsForScript + "[" + allFields.get(i).getColumnName().replace("(PK)", "")
-                        .replace("(FK)", "").trim() + "]\t" + allFields.get(i).getDatatype() + "\t" +
+                rowsForScript = rowsForScript + "[" + allFields.get(i).getColumnName() + "]\t" + allFields.get(i).getDatatype() + "\t" +
                         handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied()) + "\n\t,";
         }
         return rowsForScript;
@@ -87,13 +94,6 @@ public class ScriptGenerator {
             return "C" + targetExtract.toUpperCase().substring(0, 2) + scdType.charAt(0);
         }
     }
-
-//    private String handleDatatype(String datatype) {
-//        if (datatype.contains("varchar") || datatype.contains("decimal")){
-//            return datatype.replace("(", "](");
-//        }
-//        return datatype +"]";
-//    }
 
     private String handleGeneralRuleApplied(String generalRuleApplied) {
         List<String> rulesThatAllowNull = Arrays.asList("General Rule 5", "General Date Rule 5"

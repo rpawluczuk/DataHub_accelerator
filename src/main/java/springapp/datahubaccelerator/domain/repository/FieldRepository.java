@@ -47,7 +47,9 @@ public class FieldRepository {
             Field field = new Field();
             field.setInput(input);
             field.setTargetExtract(targetExtractList.get(i));
-            field.setColumnName(columnNameList.get(i));
+            String columnName = columnNameList.get(i).replace("(FK)", "")
+                    .replace("(PK)", "").trim();
+            field.setColumnName(columnName);
             field.setDatatype(datatypeList.get(i));
             field.setScdType(scdTypeList.get(i));
             try {
@@ -58,7 +60,6 @@ public class FieldRepository {
             }
             field.setReasonAdded(reasonAddedList.get(i));
             if (columnNameList.get(i).contains("KEY")){
-                String columnName = columnNameList.get(i).replace("(FK)", "").trim();
                 String joinedTable = ScriptGenerator.generateJoinedTableName(columnName);
                 field.setJoinedTable(joinedTable);
             }

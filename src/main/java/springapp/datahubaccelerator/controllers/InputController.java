@@ -23,7 +23,7 @@ public class InputController {
     @Autowired
     FieldService fieldService;
 
-    @RequestMapping("/addinput")
+    @RequestMapping(value={"", "/", "/addinput"})
     public String addInput(Model model) {
         model.addAttribute("input", new Input());
         return "addinput";

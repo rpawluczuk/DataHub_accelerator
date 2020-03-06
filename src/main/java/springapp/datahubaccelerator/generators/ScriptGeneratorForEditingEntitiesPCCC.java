@@ -21,14 +21,6 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
         this.targetExtract = newFields.get(0).getTargetExtract();
     }
 
-    private Integer getNewestUserStoryNumber(List<Field> allFields) {
-        return allFields.stream()
-                    .filter(f -> !f.getReasonAdded().toUpperCase().equals("BASE"))
-                    .map(f -> f.getReasonAdded().replace("P17152-", ""))
-                    .map(s -> Integer.valueOf(s))
-                    .max(Integer::compare).get();
-    }
-
     public String generateDDLScript() {
         return generateTRFPart() +
                 "\n/* ODS Changes */\n" +

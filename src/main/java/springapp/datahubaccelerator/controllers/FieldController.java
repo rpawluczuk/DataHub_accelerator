@@ -33,7 +33,11 @@ public class FieldController {
         Integer inputId = input.getId();
         fieldService.generateField(input);
         List<Field> allFields = fieldService.getAllFields(inputId);
-        model.addAttribute("fields", allFields);
+        Integer newestUserStoryNumber = ScriptGenerator.getNewestUserStoryNumber(allFields);
+        List<Field> newFields = allFields.stream()
+                .filter(f -> f.getReasonAdded().contains(newestUserStoryNumber.toString()))
+                .collect(Collectors.toList());
+        model.addAttribute("fields", newFields);
         return "rowgenerator";
     }
 
@@ -41,7 +45,11 @@ public class FieldController {
     public String checkJoinedTables(Model model) {
         Integer inputId = inputService.getLastInput().getId();
         List<Field> allFields = fieldService.getAllFields(inputId);
-        List<Field> keyFields = allFields.stream().filter(f -> f.getJoinedTable()!=null).collect(Collectors.toList());
+        Integer newestUserStoryNumber = ScriptGenerator.getNewestUserStoryNumber(allFields);
+        List<Field> newFields = allFields.stream()
+                .filter(f -> f.getReasonAdded().contains(newestUserStoryNumber.toString()))
+                .collect(Collectors.toList());
+        List<Field> keyFields = newFields.stream().filter(f -> f.getJoinedTable()!=null).collect(Collectors.toList());
         model.addAttribute("keyfields", keyFields);
         return "keyfields";
     }

@@ -11,29 +11,31 @@
 </head>
 <body>
 <div class="container">
+    <h2 class="font-weight-bold">Paste the appropriate columns into the following text boxes</h2>
+    <br/>
     <form class="form-horizontal" th:object="${input}" th:action="@{/rowgenerator}" th:method="post">
         <div class="form-group">
-            <label class="control-label">target extract:</label>
+            <label class="font-weight-bold">Target Extract:</label>
             <textarea type="text" class="form-control" th:field="*{targetExtract}"></textarea>
         </div>
         <div class="form-group">
-            <label class="control-label">column name:</label>
+            <label class="font-weight-bold">Column Name:</label>
             <textarea type="text" class="form-control" th:field="*{columnName}"></textarea>
         </div>
         <div class="form-group">
-            <label class="control-label">datatype:</label>
+            <label class="font-weight-bold">Datatype:</label>
             <textarea type="text" class="form-control" th:field="*{datatype}"></textarea>
         </div>
         <div class="form-group">
-            <label class="control-label">SCD type:</label>
+            <label class="font-weight-bold">SCD type:</label>
             <textarea type="text" class="form-control" th:field="*{scdType}"></textarea>
         </div>
         <div class="form-group">
-            <label class="control-label">general rule applied:</label>
+            <label class="font-weight-bold">General Rule Applied:</label>
             <textarea type="text" class="form-control" th:field="*{generalRuleApplied}"></textarea>
         </div>
         <div class="form-group">
-            <label class="control-label">Reason Added:</label>
+            <label class="font-weight-bold">Reason Added:</label>
             <textarea type="text" class="form-control" th:field="*{reasonAdded}"></textarea>
         </div>
         <div class="field">
