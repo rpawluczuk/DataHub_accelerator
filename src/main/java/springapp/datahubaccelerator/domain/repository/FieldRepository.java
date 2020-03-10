@@ -40,6 +40,7 @@ public class FieldRepository {
         List<String> targetExtractList = Arrays.asList(input.getTargetExtract().split("\r\n"));
         List<String> columnNameList = Arrays.asList(input.getColumnName().split("\r\n"));
         List<String> datatypeList = Arrays.asList(input.getDatatype().split("\r\n"));
+        List<String> sourceTableList = Arrays.asList(input.getSourceTable().split("\r\n"));
         List<String> scdTypeList = Arrays.asList(input.getScdType().split("\r\n"));
         List<String> generalRuleAppliedList = Arrays.asList(input.getGeneralRuleApplied().split("\r\n"));
         List<String> reasonAddedList = Arrays.asList(input.getReasonAdded().split("\r\n"));
@@ -51,6 +52,7 @@ public class FieldRepository {
                     .replace("(PK)", "").trim();
             field.setColumnName(columnName);
             field.setDatatype(datatypeList.get(i));
+            field.setSourceTable(sourceTableList.get(i));
             field.setScdType(scdTypeList.get(i));
             try {
                 field.setGeneralRuleApplied(generalRuleAppliedList.get(i));
@@ -60,8 +62,10 @@ public class FieldRepository {
             }
             field.setReasonAdded(reasonAddedList.get(i));
             if (columnNameList.get(i).contains("KEY")){
-                String joinedTable = ScriptGenerator.generateJoinedTableName(columnName);
+                String joinedTable = ScriptGenerator.generateJoinedTableName(sourceTableList.get(i));
                 field.setJoinedTable(joinedTable);
+                String primaryKeyOfJoinedTable = ScriptGenerator.generatePrimaryKeyOfJoinedTableName(sourceTableList.get(i));
+                field.setPrimaryKeyOfJoinedTable(primaryKeyOfJoinedTable);
             }
             saveField(field);
         }

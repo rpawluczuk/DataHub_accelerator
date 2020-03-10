@@ -18,7 +18,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 .collect(Collectors.toList());
         this.newFields = newFields;
         this.userStoryNumber = newestUserStoryNumber.toString();
-        this.targetExtract = newFields.get(0).getTargetExtract();
+        this.targetExtract = newFields.get(0).getTargetExtract().toUpperCase();
     }
 
     public String generateDDLScript() {
@@ -56,7 +56,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "\tALTER TABLE TRF_" + targetExtract + " \n" +
                 "\tADD" +
                 "\t" + generateRowsForScript(newFields, 0) +
-                "END\n" +
+                "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][TRF] P17152-" + userStoryNumber +
                 ": TRF_" + targetExtract + "'\n";
@@ -83,7 +83,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                         .stream()
                         .filter(x -> !x.getScdType().equals("2"))
                         .collect(Collectors.toList()), 0) +
-                "END\n" +
+                "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] P17152-" + userStoryNumber +
                 ": CS_" + targetExtract + "_BASE'\n";
@@ -110,7 +110,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                         .stream()
                         .filter(x -> !x.getScdType().equals("1"))
                         .collect(Collectors.toList()), 0) +
-                "END\n" +
+                "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] P17152-" + userStoryNumber +
                 ": CS_" + targetExtract + "_DELTA'";
@@ -136,7 +136,11 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
         } else {
             scdType = "DELTA";
         }
-        String foreginField = field.getColumnName().replace("_KEY", "");
+        String pureJoinedTableName = field.getJoinedTable()
+                .replace("Z_CS_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "")
+                .replace("_DELTA", "");
         return "\nIF (EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
@@ -144,23 +148,23 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "\tAND EXISTS (SELECT * \n" +
                 "\t\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
                 "\t\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\t\tAND  TABLE_NAME = 'Z_CS_" + foreginField + "_BASE')\n" +
+                "\t\t\t\tAND  TABLE_NAME = '" + field.getJoinedTable() + "')\n" +
                 "\tAND NOT EXISTS (SELECT * \n" +
                 "\t\t\t\t\tFROM sys.foreign_keys\n" +
                 "\t\t\t\t\tWHERE name = 'Z_FK_" + generateShortcut(targetExtract, scdType) +
-                "_" + generateShortcut(foreginField, "BASE") + "')\n" +
+                "_" + generateShortcut(pureJoinedTableName, "BASE") + "')\n" +
                 "\t\t\t\t)\n" +
                 "BEGIN\n" +
                 "\n" +
                 "\tALTER TABLE [dbo].[Z_CS_" + targetExtract + "_" + scdType + "] ADD CONSTRAINT " +
-                "[Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +generateShortcut(foreginField, "BASE") +
+                "[Z_FK_" + generateShortcut(targetExtract, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") +
                 "] FOREIGN KEY([" + field.getColumnName() + "])\n" +
-                "\tREFERENCES [dbo].[Z_CS_" + foreginField + "_BASE] ([" + field.getColumnName() + "])\n" +
+                "\tREFERENCES [dbo].[" + field.getJoinedTable() + "] ([" + field.getColumnName() + "])\n" +
                 "END\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][FK] " +
                 userStoryNumber + ": Z_FK_" +
-                generateShortcut(targetExtract, scdType) + "_" + generateShortcut(foreginField, "BASE") + "'\n";
+                generateShortcut(targetExtract, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") + "'\n";
     }
 
     private String generateIndexesPart() {

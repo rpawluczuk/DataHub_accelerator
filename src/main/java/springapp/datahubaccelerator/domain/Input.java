@@ -24,6 +24,9 @@ public class Input {
     private String scdType;
 
     @Column(length = COLUMNS_LENGTH)
+    private String sourceTable;
+
+    @Column(length = COLUMNS_LENGTH)
     private String generalRuleApplied;
 
     @Column(length = COLUMNS_LENGTH)
@@ -70,6 +73,14 @@ public class Input {
 
     public void setScdType(String scdType) {
         this.scdType = scdType;
+    }
+
+    public String getSourceTable() {
+        return sourceTable;
+    }
+
+    public void setSourceTable(String sourceTable) {
+        this.sourceTable = sourceTable;
     }
 
     public String getGeneralRuleApplied() {

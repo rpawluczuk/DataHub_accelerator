@@ -28,6 +28,7 @@
         <tr>
             <td>Column Name</td>
             <td>Joined Table</td>
+            <td>Primary Key of Joined Table</td>
             <td></td>
         </tr>
         </thead>
@@ -35,6 +36,7 @@
         <tr>
             <td th:text="${keyfield.columnName}"></td>
             <td th:text="${keyfield.joinedTable}"></td>
+            <td th:text="${keyfield.primaryKeyOfJoinedTable}"></td>
             <td><a type="button" class="btn btn-primary" th:href="${'/keyfields/edit/'+keyfield.id}">Edit</a></td>
         </tr>
         </tbody>

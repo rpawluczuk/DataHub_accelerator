@@ -22,6 +22,9 @@ public class Field {
     private String datatype;
 
     @Column(length = COLUMNS_LENGTH)
+    private String sourceTable;
+
+    @Column(length = COLUMNS_LENGTH)
     private String scdType;
 
     @NotNull
@@ -32,6 +35,7 @@ public class Field {
     private String reasonAdded;
 
     private String joinedTable;
+    private String primaryKeyOfJoinedTable;
 
     @ManyToOne
     private Input input;
@@ -103,11 +107,27 @@ public class Field {
         this.joinedTable = joinedTable;
     }
 
+    public String getSourceTable() {
+        return sourceTable;
+    }
+
+    public void setSourceTable(String sourceTable) {
+        this.sourceTable = sourceTable;
+    }
+
     public Input getInput() {
         return input;
     }
 
     public void setInput(Input input) {
         this.input = input;
+    }
+
+    public String getPrimaryKeyOfJoinedTable() {
+        return primaryKeyOfJoinedTable;
+    }
+
+    public void setPrimaryKeyOfJoinedTable(String primaryKeyOfJoinedTable) {
+        this.primaryKeyOfJoinedTable = primaryKeyOfJoinedTable;
     }
 }

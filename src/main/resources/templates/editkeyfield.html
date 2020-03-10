@@ -33,9 +33,14 @@
             <input class="form-control" type="text" th:field="*{columnName}" readonly>
         </div>
         <div class="form-group row">
-            <label class="font-weight-bold">Description:</label>
+            <label class="font-weight-bold">Joined Table:</label>
             <input type="text" class="form-control" th:field="*{joinedTable}"/>
             <p th:if="${#fields.hasErrors('joinedTable')}" th:errors="*{joinedTable}"></p>
+        </div>
+        <div class="form-group row">
+            <label class="font-weight-bold">Primary Key of Joined Table:</label>
+            <input type="text" class="form-control" th:field="*{primaryKeyOfJoinedTable}"/>
+            <p th:if="${#fields.hasErrors('primaryKeyOfJoinedTable')}" th:errors="*{primaryKeyOfJoinedTable}"></p>
         </div>
         <div class="row">
             <button type="submit" style="margin:5px;" class="btn btn-dark btn-lg">Update Joined Table Name</button>
