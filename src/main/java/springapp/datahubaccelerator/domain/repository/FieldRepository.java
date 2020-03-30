@@ -47,7 +47,7 @@ public class FieldRepository {
         for (int i = 0; i < targetExtractList.size(); i++) {
             Field field = new Field();
             field.setInput(input);
-            field.setTargetExtract(targetExtractList.get(i));
+            field.setTargetExtract(targetExtractList.get(i).toUpperCase().replace("BDE_", ""));
             String columnName = columnNameList.get(i).replace("(FK)", "")
                     .replace("(PK)", "").trim();
             field.setColumnName(columnName);
@@ -62,9 +62,16 @@ public class FieldRepository {
             }
             field.setReasonAdded(reasonAddedList.get(i));
             if (columnNameList.get(i).contains("KEY")){
-                String joinedTable = ScriptGenerator.generateJoinedTableName(sourceTableList.get(i));
+                String joinedTable;
+                String primaryKeyOfJoinedTable;
+                if(i == 0){
+                    joinedTable = "Z_CS_" + field.getTargetExtract() + "_BASE";
+                    primaryKeyOfJoinedTable = field.getColumnName();
+                }else{
+                    joinedTable = ScriptGenerator.generateJoinedTableName(sourceTableList.get(i));
+                    primaryKeyOfJoinedTable = ScriptGenerator.generatePrimaryKeyOfJoinedTableName(sourceTableList.get(i));
+                }
                 field.setJoinedTable(joinedTable);
-                String primaryKeyOfJoinedTable = ScriptGenerator.generatePrimaryKeyOfJoinedTableName(sourceTableList.get(i));
                 field.setPrimaryKeyOfJoinedTable(primaryKeyOfJoinedTable);
             }
             saveField(field);

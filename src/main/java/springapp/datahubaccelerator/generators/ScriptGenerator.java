@@ -39,13 +39,27 @@ public class ScriptGenerator {
     }
 
     public static String generateJoinedTableName(String sourceTable) {
-        return "Z_CS_" + sourceTable.toUpperCase().replace("CC_", "")
-                .replace("PC_", "").trim() + "_BASE";
+        switch (sourceTable) {
+            case "cc_user":
+                return "CS_CLAIM_USER_BASE";
+            default: {
+                String foreignEntityName = sourceTable.toUpperCase()
+                        .replace("CC_", "CLAIM_")
+                        .replace("CCX_", "")
+                        .replace("_EXT", "")
+                        .replace("PC_", "").trim();
+                return "Z_CS_" + foreignEntityName + "_BASE";
+            }
+        }
     }
 
     public static String generatePrimaryKeyOfJoinedTableName(String sourceTable) {
-        return sourceTable.toUpperCase().replace("CC_", "")
-                .replace("PC_", "").trim() + "_KEY";
+        String foreignEntityName = sourceTable.toUpperCase()
+                .replace("CC_", "CLAIM_")
+                .replace("CCX_", "")
+                .replace("_EXT", "")
+                .replace("PC_", "").trim();
+        return foreignEntityName + "_KEY";
     }
 
     String generateRowsForScript(List<Field> allFields, int id) {
@@ -56,7 +70,8 @@ public class ScriptGenerator {
                         handleDataType(allFields.get(i).getDatatype()) + "\t" +
                         handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied());
             } else {
-                rowsForScript = rowsForScript + "\n\t,[" + allFields.get(i).getColumnName() + "]\t" + allFields.get(i).getDatatype() + "\t" +
+                rowsForScript = rowsForScript + "\n\t,[" + allFields.get(i).getColumnName() + "]\t" +
+                        handleDataType(allFields.get(i).getDatatype()) + "\t" +
                         handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied());
             }
         }
