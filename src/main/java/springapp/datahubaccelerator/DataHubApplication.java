@@ -10,7 +10,7 @@ public class DataHubApplication extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(SpringBootServletInitializer.class);
+        return application.sources(DataHubApplication.class);
     }
 
     public static void main(String[] args) {
