@@ -13,39 +13,39 @@
 <div class="container">
     <h2 class="font-weight-bold">Paste the appropriate columns into the following text boxes</h2>
     <br/>
-    <form class="form-horizontal" th:object="${input}" th:action="@{/rowgenerator}" th:method="post">
-        <div class="form-group">
-            <label class="font-weight-bold">Target Extract:</label>
-            <textarea type="text" class="form-control" th:field="*{targetExtract}"></textarea>
-        </div>
-        <div class="form-group">
-            <label class="font-weight-bold">Column Name:</label>
-            <textarea type="text" class="form-control" th:field="*{columnName}"></textarea>
-        </div>
-        <div class="form-group">
-            <label class="font-weight-bold">Datatype:</label>
-            <textarea type="text" class="form-control" th:field="*{datatype}"></textarea>
-        </div>
-        <div class="form-group">
-            <label class="font-weight-bold">SCD type:</label>
-            <textarea type="text" class="form-control" th:field="*{scdType}"></textarea>
-        </div>
-        <div class="form-group">
-            <label class="font-weight-bold">Source Table:</label>
-            <textarea type="text" class="form-control" th:field="*{sourceTable}"></textarea>
-        </div>
-        <div class="form-group">
-            <label class="font-weight-bold">General Rule Applied:</label>
-            <textarea type="text" class="form-control" th:field="*{generalRuleApplied}"></textarea>
-        </div>
-        <div class="form-group">
-            <label class="font-weight-bold">Reason Added:</label>
-            <textarea type="text" class="form-control" th:field="*{reasonAdded}"></textarea>
-        </div>
-        <div class="field">
-            <button type="submit" class="btn btn-dark">Generate Columns</button>
-        </div>
-    </form>
+<!--    <form class="form-horizontal" th:object="${input}" th:action="@{/rowgenerator}" th:method="post">-->
+<!--        <div class="form-group">-->
+<!--            <label class="font-weight-bold">Target Extract:</label>-->
+<!--            <textarea type="text" class="form-control" th:field="*{targetExtract}"></textarea>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label class="font-weight-bold">Column Name:</label>-->
+<!--            <textarea type="text" class="form-control" th:field="*{columnName}"></textarea>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label class="font-weight-bold">Datatype:</label>-->
+<!--            <textarea type="text" class="form-control" th:field="*{datatype}"></textarea>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label class="font-weight-bold">SCD type:</label>-->
+<!--            <textarea type="text" class="form-control" th:field="*{scdType}"></textarea>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label class="font-weight-bold">Source Table:</label>-->
+<!--            <textarea type="text" class="form-control" th:field="*{sourceTable}"></textarea>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label class="font-weight-bold">General Rule Applied:</label>-->
+<!--            <textarea type="text" class="form-control" th:field="*{generalRuleApplied}"></textarea>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label class="font-weight-bold">Reason Added:</label>-->
+<!--            <textarea type="text" class="form-control" th:field="*{reasonAdded}"></textarea>-->
+<!--        </div>-->
+<!--        <div class="field">-->
+<!--            <button type="submit" class="btn btn-dark">Generate Columns</button>-->
+<!--        </div>-->
+<!--    </form>-->
 </div>
 </body>
 </html>
