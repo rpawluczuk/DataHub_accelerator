@@ -3,9 +3,8 @@ package springapp.datahubaccelerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.Formatter;
 import org.springframework.stereotype.Service;
-import springapp.datahubaccelerator.domain.Field;
 import springapp.datahubaccelerator.domain.Input;
-import springapp.datahubaccelerator.domain.repository.InputRepository;
+import springapp.datahubaccelerator.services.InputService;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -15,11 +14,11 @@ public class InputFormatter implements Formatter<Input> {
 
 
     @Autowired
-    InputRepository inputRepository;
+    InputService inputService;
 
     @Override
     public Input parse(String idAsString, Locale locale) throws ParseException {
-        return inputRepository.getLastInput();
+        return inputService.getLastInput();
     }
 
     @Override
