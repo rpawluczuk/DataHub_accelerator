@@ -32,7 +32,7 @@ public class FieldController {
         Input input = inputService.getLastInput();
         Integer inputId = input.getId();
         fieldService.generateField(input);
-        List<Field> allFields = fieldService.getAllFields(inputId);
+        List<Field> allFields = fieldService.findAllFieldsByInputId(inputId);
         Integer newestUserStoryNumber = ScriptGenerator.getNewestUserStoryNumber(allFields);
         List<Field> newFields = allFields.stream()
                 .filter(f -> f.getReasonAdded().contains(newestUserStoryNumber.toString()))
@@ -44,7 +44,7 @@ public class FieldController {
     @RequestMapping("/keyfields")
     public String checkJoinedTables(Model model) {
         Integer inputId = inputService.getLastInput().getId();
-        List<Field> allFields = fieldService.getAllFields(inputId);
+        List<Field> allFields = fieldService.findAllFieldsByInputId(inputId);
         Integer newestUserStoryNumber = ScriptGenerator.getNewestUserStoryNumber(allFields);
         List<Field> newFields = allFields.stream()
                 .filter(f -> f.getReasonAdded().contains(newestUserStoryNumber.toString()))
@@ -56,7 +56,7 @@ public class FieldController {
 
     @RequestMapping("/keyfields/edit/{id}")
     public String editKeyField(@PathVariable("id") Integer id, Model model) {
-        Field keyFieldToEdit = fieldService.getField(id);
+        Field keyFieldToEdit = fieldService.findFieldById(id);
         model.addAttribute("keyfield", keyFieldToEdit);
         return "editkeyfield";
     }
@@ -79,7 +79,7 @@ public class FieldController {
     public String generateScript(Model model) {
         Input input = inputService.getLastInput();
         Integer inputId = input.getId();
-        List<Field> allFields = fieldService.getAllFields(inputId);
+        List<Field> allFields = fieldService.findAllFieldsByInputId(inputId);
         String ddlScript = fieldService.generateScripts(allFields).get(0);
         model.addAttribute("ddlscript", ddlScript);
         String dmlScript = fieldService.generateScripts(allFields).get(1);
@@ -91,7 +91,7 @@ public class FieldController {
     public String generateTest(Model model) {
         Input input = inputService.getLastInput();
         Integer inputId = input.getId();
-        List<Field> allFields = fieldService.getAllFields(inputId);
+        List<Field> allFields = fieldService.findAllFieldsByInputId(inputId);
         String testCase = fieldService.generateTest(allFields);
         model.addAttribute("testcase", testCase);
         return "testgenerator";

@@ -15,18 +15,27 @@ public class InputService {
     InputRepository inputRepository;
 
     public void saveInput(Input input) {
-        inputRepository.saveInput(input);
+        inputRepository.save(input);
     }
 
-    public Input getLastInput() {
-        return inputRepository.getLastInput();
+    @Transactional
+    public List<Input> findAllInputs() {
+        return (List<Input>) inputRepository.findAll();
     }
 
-    public List<Input> getAllInputs() {
-        return inputRepository.getAllInputs();
-    }
-
+    @Transactional
     public void deleteInput(Input input) {
-        inputRepository.deleteInput(input);
+        inputRepository.delete(input);
+    }
+
+    public Input findInputById(Integer id) {
+        return inputRepository.findById(id).get();
+    }
+
+    @Transactional
+    public Input getLastInput() {
+        List<Input> allInputsList = findAllInputs();
+        int lastId = allInputsList.get(allInputsList.size() - 1).getId();
+        return findInputById(lastId);
     }
 }
