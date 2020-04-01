@@ -27,6 +27,11 @@ public class InputController {
         return "addinput";
     }
 
+    @RequestMapping(value="/addexcel")
+    public String addExcel(Model model) {
+        return "addexcel";
+    }
+
     @RequestMapping(value = "/rowgenerator", method = RequestMethod.POST)
     public String saveStructure(Input input) {
         List<Input> listOfAllInputs = inputService.findAllInputs();

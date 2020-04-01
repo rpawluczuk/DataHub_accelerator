@@ -42,7 +42,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
     private String generateTRFPart() {
         return "/* User Story: " + userStoryNumber + "_Bde_" + generateEntityName(targetExtract) + " */\n" +
                 "\n" +
-                "/* TRF Changes */\n" +
+                "/* TRF Changes */" +
                 "IF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
@@ -60,7 +60,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
     }
 
     private String generateODSBasePart() {
-        return "\n/* ODS Changes */\n" +
+        return "\n/* ODS Changes */" +
                 "\n" +
                 "IF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
@@ -149,7 +149,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
         for (Field field : allKeyFields) {
             constraintPartScript = constraintPartScript + generateSingleConstraint(field);
         }
-        return "\n/* Constraints */\n" + constraintPartScript + "\nGO\n";
+        return "\n/* Constraints */" + constraintPartScript + "\nGO\n";
     }
 
     private String generateIndexesPart() {
@@ -160,7 +160,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
         for (Field field : allKeyFields) {
             indexPartScript = indexPartScript + generateSingleIndex(field.getScdType(), field.getColumnName());
         }
-        return "\n/* Indexes */\n" + indexPartScript +
+        return "\n/* Indexes */" + indexPartScript +
                 generateSingleIndex("1", "ETL_LAST_UPDATE_DTS") +
                 generateSingleIndex("2", "ETL_LAST_UPDATE_DTS") + "\nGO\n";
     }
