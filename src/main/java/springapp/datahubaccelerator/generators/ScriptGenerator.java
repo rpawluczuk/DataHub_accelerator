@@ -39,9 +39,9 @@ public class ScriptGenerator {
     }
 
     public static String generateJoinedTableName(String sourceTable) {
-        if (sourceTable.contains("CC_")){
+        if (sourceTable.toUpperCase().contains("CC_")){
             return "CS_" + sourceTable.toUpperCase().replace("CC_", "CLAIM_") + "_BASE";
-        } else if (sourceTable.contains("PC_")){
+        } else if (sourceTable.toUpperCase().contains("PC_")){
             return "CS_" + sourceTable.toUpperCase().replace("PC_", "") + "_BASE";
         } else {
             String foreignEntityName = sourceTable.toUpperCase()
