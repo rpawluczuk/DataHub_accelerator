@@ -39,19 +39,16 @@ public class ScriptGenerator {
     }
 
     public static String generateJoinedTableName(String sourceTable) {
-        switch (sourceTable) {
-            case "cc_user":
-                return "CS_CLAIM_USER_BASE";
-            case "pc_job":
-                return "CS_JOB_BASE";
-            default: {
-                String foreignEntityName = sourceTable.toUpperCase()
-                        .replace("CC_", "CLAIM_")
-                        .replace("CCX_", "")
-                        .replace("_EXT", "")
-                        .replace("PC_", "").trim();
-                return "Z_CS_" + foreignEntityName + "_BASE";
-            }
+        if (sourceTable.contains("CC_")){
+            return "CS_" + sourceTable.toUpperCase().replace("CC_", "CLAIM_") + "_BASE";
+        } else if (sourceTable.contains("PC_")){
+            return "CS_" + sourceTable.toUpperCase().replace("PC_", "") + "_BASE";
+        } else {
+            String foreignEntityName = sourceTable.toUpperCase()
+                    .replace("CCX_", "")
+                    .replace("_EXT", "")
+                    .trim();
+            return "Z_CS_" + foreignEntityName + "_BASE";
         }
     }
 
