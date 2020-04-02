@@ -42,6 +42,8 @@ public class ScriptGenerator {
         switch (sourceTable) {
             case "cc_user":
                 return "CS_CLAIM_USER_BASE";
+            case "pc_job":
+                return "CS_JOB_BASE";
             default: {
                 String foreignEntityName = sourceTable.toUpperCase()
                         .replace("CC_", "CLAIM_")

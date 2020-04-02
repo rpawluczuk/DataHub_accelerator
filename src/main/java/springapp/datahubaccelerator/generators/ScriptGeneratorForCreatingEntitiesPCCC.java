@@ -42,7 +42,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
     private String generateTRFPart() {
         return "/* User Story: " + userStoryNumber + "_Bde_" + generateEntityName(targetExtract) + " */\n" +
                 "\n" +
-                "/* TRF Changes */" +
+                "/* TRF Changes */\n" +
                 "IF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
