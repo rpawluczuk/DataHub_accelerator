@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import springapp.datahubaccelerator.Components.ExcelComponent;
 import springapp.datahubaccelerator.domain.Excel;
 import springapp.datahubaccelerator.domain.SheetOfExcelInput;
 import springapp.datahubaccelerator.domain.repository.ExcelRepository;
@@ -23,6 +24,9 @@ public class ExcelInputService {
     ExcelRepository excelRepository;
 
     @Autowired
+    ExcelComponent excelComponent;
+
+    @Autowired
     SheetOfExcelInputRepository sheetOfExcelInputRepository;
 
     public void saveDataFromUploadedFile(Excel excel) throws Exception {
@@ -31,13 +35,14 @@ public class ExcelInputService {
         if (extension.equalsIgnoreCase("xls") || extension.equalsIgnoreCase("xlsx")){
             Workbook workbook = getWorkBook(excelFile);
             excel.setNumberOfSheets(workbook.getNumberOfSheets());
-            List<String> allSheetNames = new ArrayList<>();
+            List<Sheet> allSheets= new ArrayList<>();
             for (int i = 0; i < excel.getNumberOfSheets(); i++) {
                 SheetOfExcelInput sheetOfExcelInput = new SheetOfExcelInput();
                 sheetOfExcelInput.setName(workbook.getSheetAt(i).getSheetName());
-//                sheetOfExcelInput.setExcel(excel);
+                allSheets.add(workbook.getSheetAt(i));
                 sheetOfExcelInputRepository.save(sheetOfExcelInput);
             }
+            excelComponent.setListOfSheets(allSheets);
         } else {
             throw new Exception("Wrong file format");
         }

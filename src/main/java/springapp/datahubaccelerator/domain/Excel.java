@@ -17,9 +17,6 @@ public class Excel {
 
     private int numberOfSheets;
 
-//    @Lob
-//    private byte[] excelFile;
-
     @Transient
     private MultipartFile excelFile;
 
@@ -49,14 +46,6 @@ public class Excel {
     public void setNumberOfSheets(int numberOfSheets) {
         this.numberOfSheets = numberOfSheets;
     }
-
-//    public byte[] getExcelFile() {
-//        return excelFile;
-//    }
-//
-//    public void setExcelFile(byte[] excelFile) {
-//        this.excelFile = excelFile;
-//    }
 
     public MultipartFile getExcelFile() {
         return excelFile;
