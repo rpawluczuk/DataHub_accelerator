@@ -1,5 +1,7 @@
 package springapp.datahubaccelerator.domain;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.persistence.*;
 
 @Entity
@@ -31,6 +33,9 @@ public class Input {
 
     @Column(length = COLUMNS_LENGTH)
     private String reasonAdded;
+
+    @Transient
+    private MultipartFile excelFile;
 
     public Input() {
     }
@@ -97,5 +102,13 @@ public class Input {
 
     public void setReasonAdded(String reasonAdded) {
         this.reasonAdded = reasonAdded;
+    }
+
+    public MultipartFile getExcelFile() {
+        return excelFile;
+    }
+
+    public void setExcelFile(MultipartFile excelFile) {
+        this.excelFile = excelFile;
     }
 }
