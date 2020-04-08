@@ -1,5 +1,8 @@
 package springapp.datahubaccelerator.controllers;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,12 +12,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import springapp.datahubaccelerator.Components.ExcelComponent;
 import springapp.datahubaccelerator.domain.Excel;
+import springapp.datahubaccelerator.domain.Field;
+import springapp.datahubaccelerator.domain.Input;
 import springapp.datahubaccelerator.domain.SheetOfExcelInput;
 import springapp.datahubaccelerator.domain.repository.ExcelRepository;
+import springapp.datahubaccelerator.domain.repository.FieldRepository;
 import springapp.datahubaccelerator.domain.repository.SheetOfExcelInputRepository;
+import springapp.datahubaccelerator.generators.ScriptGenerator;
 import springapp.datahubaccelerator.services.ExcelInputService;
+import springapp.datahubaccelerator.services.FieldService;
+import springapp.datahubaccelerator.services.InputService;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class ExcelInputController {
@@ -30,6 +41,9 @@ public class ExcelInputController {
 
     @Autowired
     ExcelComponent excelComponent;
+
+    @Autowired
+    FieldRepository fieldRepository;
 
     @RequestMapping(value="/addexcel")
     public String addExcelInput(Model model) {
@@ -58,8 +72,41 @@ public class ExcelInputController {
         Sheet sheet = excelComponent.getListOfSheets().stream()
                 .filter(s -> s.getSheetName().equals(choosenSheetName))
                 .findFirst().get();
-        String sheetName = sheet.getSheetName();
-        System.out.println(sheetName);
-        return "editkeyfield";
+        for (int i = 3; !sheet.getRow(i).getCell(1).getStringCellValue().isEmpty(); i++) {
+            Field field = new Field();
+            field.setTargetExtract(sheet.getRow(i).getCell(1).getStringCellValue());
+            field.setColumnName(sheet.getRow(i).getCell(3).getStringCellValue());
+            field.setDatatype(sheet.getRow(i).getCell(4).getStringCellValue());
+            if (sheet.getRow(i).getCell(8).getCellType().equals(CellType.STRING)){
+                field.setScdType(sheet.getRow(i).getCell(8).getStringCellValue());
+            } else {
+                field.setScdType("" + sheet.getRow(i).getCell(8).getNumericCellValue());
+            }
+            field.setSourceTable(sheet.getRow(i).getCell(16).getStringCellValue());
+            field.setGeneralRuleApplied(sheet.getRow(i).getCell(36).getStringCellValue());
+            field.setReasonAdded(sheet.getRow(i).getCell(40).getStringCellValue());
+            if (field.getColumnName().contains("KEY")){
+                String joinedTable;
+                String primaryKeyOfJoinedTable;
+                if(i == 0){
+                    joinedTable = "Z_CS_" + field.getTargetExtract() + "_BASE";
+                    primaryKeyOfJoinedTable = field.getColumnName();
+                }else{
+                    joinedTable = ScriptGenerator.generateJoinedTableName(field.getSourceTable());
+                    primaryKeyOfJoinedTable = ScriptGenerator.generatePrimaryKeyOfJoinedTableName(field.getSourceTable());
+                }
+                field.setJoinedTable(joinedTable);
+                field.setPrimaryKeyOfJoinedTable(primaryKeyOfJoinedTable);
+            }
+            fieldRepository.save(field);
+        }
+        return "redirect:/excel/rowgenerator";
+    }
+
+    @RequestMapping("/excel/rowgenerator")
+    public String generateColumns(Model model) { ;
+        List<Field> allFields = (List<Field>) fieldRepository.findAll();
+        model.addAttribute("fields", allFields);
+        return "rowgenerator";
     }
 }
