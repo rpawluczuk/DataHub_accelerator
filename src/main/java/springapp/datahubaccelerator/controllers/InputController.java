@@ -20,11 +20,11 @@ public class InputController {
     @Autowired
     FieldService fieldService;
 
-    @RequestMapping(value="/addinput")
-    public String addInput(Model model) {
-        model.addAttribute("input", new Input());
-        return "addinput";
-    }
+//    @RequestMapping(value="/addinput")
+//    public String addInput(Model model) {
+//        model.addAttribute("input", new Input());
+//        return "addinput";
+//    }
 
     @RequestMapping(value = "/rowgenerator", method = RequestMethod.POST)
     public String saveStructure(Input input) {

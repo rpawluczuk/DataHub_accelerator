@@ -48,7 +48,7 @@ public class ExcelInputController {
     @Autowired
     FieldService fieldService;
 
-    @RequestMapping(value="/addexcel")
+    @RequestMapping(value="/addinput")
     public String addExcelInput(Model model) {
         model.addAttribute("excelinput", new Excel());
         return "addexcel";
@@ -56,6 +56,8 @@ public class ExcelInputController {
 
     @RequestMapping(value = "/sheetlist", method = RequestMethod.POST)
     public String saveExcelInput(Excel excel) throws Exception {
+        fieldRepository.deleteAll();
+        sheetOfExcelInputRepository.deleteAll();
         excelInputService.saveDataFromUploadedFile(excel);
 //        excelInput.setSheetName(sheetname);
 //        excelInputRepository.save(excelInput);
@@ -69,7 +71,7 @@ public class ExcelInputController {
         return "sheetlist";
     }
 
-    @RequestMapping("//excel/rowgenerator/{id}")
+    @RequestMapping(value = "/excel/rowgenerator/{id}")
     public String editKeyField(@PathVariable("id") Integer id, Model model) {
         String choosenSheetName = sheetOfExcelInputRepository.findById(id).get().getName();
         Sheet sheet = excelComponent.getListOfSheets().stream()
@@ -83,7 +85,7 @@ public class ExcelInputController {
             if (sheet.getRow(i).getCell(8).getCellType().equals(CellType.STRING)){
                 field.setScdType(sheet.getRow(i).getCell(8).getStringCellValue());
             } else {
-                field.setScdType("" + sheet.getRow(i).getCell(8).getNumericCellValue());
+                field.setScdType("" + (int) sheet.getRow(i).getCell(8).getNumericCellValue());
             }
             field.setSourceTable(sheet.getRow(i).getCell(16).getStringCellValue());
             field.setGeneralRuleApplied(sheet.getRow(i).getCell(36).getStringCellValue());

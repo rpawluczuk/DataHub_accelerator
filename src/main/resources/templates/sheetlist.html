@@ -20,7 +20,7 @@
         <tbody th:each="sheet:${allsheets}">
         <tr>
             <td th:text="${sheet.name}"></td>
-            <td><a type="button" class="btn btn-primary" th:href="${'/excel/rowgenerator/'+sheet.id}">Edit</a></td>
+            <td><a type="button" class="btn btn-primary" th:href="${'/excel/rowgenerator/'+sheet.id}">Choose</a></td>
         </tr>
         </tbody>
     </table>

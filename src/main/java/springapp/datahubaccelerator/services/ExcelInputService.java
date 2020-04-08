@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import springapp.datahubaccelerator.Components.ExcelComponent;
+import springapp.datahubaccelerator.DontAllowedSheets;
 import springapp.datahubaccelerator.domain.Excel;
 import springapp.datahubaccelerator.domain.SheetOfExcelInput;
 import springapp.datahubaccelerator.domain.repository.ExcelRepository;
 import springapp.datahubaccelerator.domain.repository.SheetOfExcelInputRepository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -37,10 +39,15 @@ public class ExcelInputService {
             excel.setNumberOfSheets(workbook.getNumberOfSheets());
             List<Sheet> allSheets= new ArrayList<>();
             for (int i = 0; i < excel.getNumberOfSheets(); i++) {
-                SheetOfExcelInput sheetOfExcelInput = new SheetOfExcelInput();
-                sheetOfExcelInput.setName(workbook.getSheetAt(i).getSheetName());
-                allSheets.add(workbook.getSheetAt(i));
-                sheetOfExcelInputRepository.save(sheetOfExcelInput);
+                String sheetName = workbook.getSheetAt(i).getSheetName();
+                boolean isSheetAllowed = !Arrays.stream(DontAllowedSheets.values())
+                        .anyMatch(s -> s.getNameOfSheet().equals(sheetName));
+                if (isSheetAllowed){
+                    SheetOfExcelInput sheetOfExcelInput = new SheetOfExcelInput();
+                    sheetOfExcelInput.setName(workbook.getSheetAt(i).getSheetName());
+                    allSheets.add(workbook.getSheetAt(i));
+                    sheetOfExcelInputRepository.save(sheetOfExcelInput);
+                }
             }
             excelComponent.setListOfSheets(allSheets);
         } else {
@@ -48,20 +55,11 @@ public class ExcelInputService {
         }
     }
 
-    private String readDataFromExcel(MultipartFile excelFile) {
-        Workbook workbook = getWorkBook(excelFile);
-//        Sheet sheet = workbook.getSheetAt(0);
-//        String sheetName = sheet.getSheetName();
-        String sheetName = "" + workbook.getNumberOfSheets();
-        return sheetName;
-    }
-
     private Workbook getWorkBook(MultipartFile excelFile) {
         Workbook workbook = null;
         try{
                 ZipSecureFile.setMinInflateRatio(0);
                 workbook = new XSSFWorkbook(excelFile.getInputStream());
-//                workbook = new HSSFWorkbook(excelFile.getInputStream());
         } catch (Exception e) {
             e.printStackTrace();
         }
