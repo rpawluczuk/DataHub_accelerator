@@ -45,6 +45,9 @@ public class ExcelInputController {
     @Autowired
     FieldRepository fieldRepository;
 
+    @Autowired
+    FieldService fieldService;
+
     @RequestMapping(value="/addexcel")
     public String addExcelInput(Model model) {
         model.addAttribute("excelinput", new Excel());
@@ -108,5 +111,23 @@ public class ExcelInputController {
         List<Field> allFields = (List<Field>) fieldRepository.findAll();
         model.addAttribute("fields", allFields);
         return "rowgenerator";
+    }
+
+    @RequestMapping("/keyfields")
+    public String checkJoinedTables(Model model) {
+        List<Field> allFields = (List<Field>) fieldRepository.findAll();
+        List<Field> keyFields = allFields.stream().filter(f -> f.getJoinedTable()!=null).collect(Collectors.toList());
+        model.addAttribute("keyfields", keyFields);
+        return "keyfields";
+    }
+
+    @RequestMapping("/scriptgenerator")
+    public String generateScript(Model model) {
+        List<Field> allFields = (List<Field>) fieldRepository.findAll();
+        String ddlScript = fieldService.generateScripts(allFields).get(0);
+        model.addAttribute("ddlscript", ddlScript);
+        String dmlScript = fieldService.generateScripts(allFields).get(1);
+        model.addAttribute("dmlscript", dmlScript);
+        return "scriptgenerator";
     }
 }

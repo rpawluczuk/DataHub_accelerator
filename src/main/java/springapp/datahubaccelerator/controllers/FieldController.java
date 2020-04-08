@@ -41,18 +41,18 @@ public class FieldController {
         return "rowgenerator";
     }
 
-    @RequestMapping("/keyfields")
-    public String checkJoinedTables(Model model) {
-        Integer inputId = inputService.getLastInput().getId();
-        List<Field> allFields = fieldService.findAllFieldsByInputId(inputId);
-        Integer newestUserStoryNumber = ScriptGenerator.getNewestUserStoryNumber(allFields);
-        List<Field> newFields = allFields.stream()
-                .filter(f -> f.getReasonAdded().contains(newestUserStoryNumber.toString()))
-                .collect(Collectors.toList());
-        List<Field> keyFields = newFields.stream().filter(f -> f.getJoinedTable()!=null).collect(Collectors.toList());
-        model.addAttribute("keyfields", keyFields);
-        return "keyfields";
-    }
+//    @RequestMapping("/keyfields")
+//    public String checkJoinedTables(Model model) {
+//        Integer inputId = inputService.getLastInput().getId();
+//        List<Field> allFields = fieldService.findAllFieldsByInputId(inputId);
+//        Integer newestUserStoryNumber = ScriptGenerator.getNewestUserStoryNumber(allFields);
+//        List<Field> newFields = allFields.stream()
+//                .filter(f -> f.getReasonAdded().contains(newestUserStoryNumber.toString()))
+//                .collect(Collectors.toList());
+//        List<Field> keyFields = newFields.stream().filter(f -> f.getJoinedTable()!=null).collect(Collectors.toList());
+//        model.addAttribute("keyfields", keyFields);
+//        return "keyfields";
+//    }
 
     @RequestMapping("/keyfields/edit/{id}")
     public String editKeyField(@PathVariable("id") Integer id, Model model) {
@@ -75,17 +75,17 @@ public class FieldController {
         }
     }
 
-    @RequestMapping("/scriptgenerator")
-    public String generateScript(Model model) {
-        Input input = inputService.getLastInput();
-        Integer inputId = input.getId();
-        List<Field> allFields = fieldService.findAllFieldsByInputId(inputId);
-        String ddlScript = fieldService.generateScripts(allFields).get(0);
-        model.addAttribute("ddlscript", ddlScript);
-        String dmlScript = fieldService.generateScripts(allFields).get(1);
-        model.addAttribute("dmlscript", dmlScript);
-        return "scriptgenerator";
-    }
+//    @RequestMapping("/scriptgenerator")
+//    public String generateScript(Model model) {
+//        Input input = inputService.getLastInput();
+//        Integer inputId = input.getId();
+//        List<Field> allFields = fieldService.findAllFieldsByInputId(inputId);
+//        String ddlScript = fieldService.generateScripts(allFields).get(0);
+//        model.addAttribute("ddlscript", ddlScript);
+//        String dmlScript = fieldService.generateScripts(allFields).get(1);
+//        model.addAttribute("dmlscript", dmlScript);
+//        return "scriptgenerator";
+//    }
 
     @RequestMapping("/testgenerator")
     public String generateTest(Model model) {
