@@ -4,22 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import springapp.datahubaccelerator.domain.Field;
-import springapp.datahubaccelerator.domain.Input;
-import springapp.datahubaccelerator.domain.repository.InputRepository;
 import springapp.datahubaccelerator.domain.repository.FieldRepository;
-import springapp.datahubaccelerator.services.FieldService;
 
 import javax.transaction.Transactional;
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 @Scope("singleton")
 public class Starter implements CommandLineRunner {
-
-    @Autowired
-    InputRepository inputRepository;
 
     @Autowired
     FieldRepository fieldRepository;

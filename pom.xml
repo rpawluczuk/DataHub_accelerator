@@ -6,7 +6,7 @@
     <groupId>com.DataHubAccelerator</groupId>
     <artifactId>dh_generator</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <name>dh_generator</name>
     <description>Demo project for Spring Boot</description>

@@ -46,6 +46,7 @@ public class ScriptGenerator {
         } else {
             String foreignEntityName = sourceTable.toUpperCase()
                     .replace("CCX_", "")
+                    .replace("PCX_", "")
                     .replace("_EXT", "")
                     .trim();
             return "Z_CS_" + foreignEntityName + "_BASE";
@@ -56,6 +57,7 @@ public class ScriptGenerator {
         String foreignEntityName = sourceTable.toUpperCase()
                 .replace("CC_", "CLAIM_")
                 .replace("CCX_", "")
+                .replace("PCX_", "")
                 .replace("_EXT", "")
                 .replace("PC_", "").trim();
         return foreignEntityName + "_KEY";
@@ -131,7 +133,7 @@ public class ScriptGenerator {
         return "NOT NULL";
     }
 
-    private String handleDataType(String dataType) {
+    public String handleDataType(String dataType) {
         if (dataType.equalsIgnoreCase("datetime")) {
             return "datetime2(7)";
         }

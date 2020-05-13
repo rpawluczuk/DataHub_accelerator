@@ -34,11 +34,11 @@ public class Field {
     @Column(length = COLUMNS_LENGTH)
     private String reasonAdded;
 
+    @Column(length = COLUMNS_LENGTH)
+    private String columnMapping;
+
     private String joinedTable;
     private String primaryKeyOfJoinedTable;
-
-    @ManyToOne
-    private Input input;
 
     public Field() {
     }
@@ -115,12 +115,12 @@ public class Field {
         this.sourceTable = sourceTable;
     }
 
-    public Input getInput() {
-        return input;
+    public String getColumnMapping() {
+        return columnMapping;
     }
 
-    public void setInput(Input input) {
-        this.input = input;
+    public void setColumnMapping(String columnMapping) {
+        this.columnMapping = columnMapping;
     }
 
     public String getPrimaryKeyOfJoinedTable() {
