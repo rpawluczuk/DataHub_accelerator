@@ -5,6 +5,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,6 +21,7 @@ import springapp.datahubaccelerator.generators.ScriptGenerator;
 import springapp.datahubaccelerator.services.ExcelInputService;
 import springapp.datahubaccelerator.services.FieldService;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,8 +57,6 @@ public class ExcelInputController {
         fieldRepository.deleteAll();
         sheetOfExcelInputRepository.deleteAll();
         excelInputService.saveDataFromUploadedFile(excel);
-//        excelInput.setSheetName(sheetname);
-//        excelInputRepository.save(excelInput);
         return "redirect:/sheetlist";
     }
 
@@ -67,7 +68,7 @@ public class ExcelInputController {
     }
 
     @RequestMapping(value = "/excel/rowgenerator/{id}")
-    public String editKeyField(@PathVariable("id") Integer id, Model model) {
+    public String generateRowsFromExcel(@PathVariable("id") Integer id, Model model) {
         String choosenSheetName = sheetOfExcelInputRepository.findById(id).get().getName();
         Sheet sheet = excelComponent.getListOfSheets().stream()
                 .filter(s -> s.getSheetName().equals(choosenSheetName))
@@ -93,7 +94,7 @@ public class ExcelInputController {
                 String joinedTable;
                 String primaryKeyOfJoinedTable;
                 if (i == 3) {
-                    joinedTable = "Z_CS_" + field.getTargetExtract() + "_BASE";
+                    joinedTable = "Z_CS_" + field.getColumnName().replace("_KEY", "") + "_BASE";
                     primaryKeyOfJoinedTable = field.getColumnName();
                 } else {
                     joinedTable = ScriptGenerator.generateJoinedTableName(field.getSourceTable());
@@ -121,6 +122,27 @@ public class ExcelInputController {
         List<Field> keyFields = allFields.stream().filter(f -> f.getJoinedTable() != null).collect(Collectors.toList());
         model.addAttribute("keyfields", keyFields);
         return "keyfields";
+    }
+
+    @RequestMapping("/keyfields/edit/{id}")
+    public String editKeyField(@PathVariable("id") Integer id, Model model) {
+        Field keyFieldToEdit = fieldService.findFieldById(id);
+        model.addAttribute("keyfield", keyFieldToEdit);
+        return "editkeyfield";
+    }
+
+    @RequestMapping(value = "/keyfields", method = RequestMethod.POST)
+    public String saveKeyField(@Valid @ModelAttribute("keyfield") Field keyField, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()){
+            System.out.println("There were errors");
+            bindingResult.getAllErrors().forEach(error -> {
+                System.out.println(error.getObjectName() + " " + error.getDefaultMessage());
+            });
+            return "editkeyfield";
+        } else {
+            fieldService.saveField(keyField);
+            return "redirect:/keyfields";
+        }
     }
 
     @RequestMapping("/scriptgenerator")

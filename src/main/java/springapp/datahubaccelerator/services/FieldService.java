@@ -27,68 +27,21 @@ public class FieldService {
         fieldRepository.delete(field);
     }
 
-//    public List<Field> findAllFieldsByInputId(Integer inputId) {
-//        return ((List<Field>) fieldRepository.findAll()).stream()
-//                .filter(f -> f.getInput().getId().equals(inputId)).collect(Collectors.toList());
-//    }
-
-//    public void generateField(Input input) {
-//        List<String> targetExtractList = Arrays.asList(input.getTargetExtract().split("\r\n"));
-//        List<String> columnNameList = Arrays.asList(input.getColumnName().split("\r\n"));
-//        List<String> datatypeList = Arrays.asList(input.getDatatype().split("\r\n"));
-//        List<String> sourceTableList = Arrays.asList(input.getSourceTable().split("\r\n"));
-//        List<String> scdTypeList = Arrays.asList(input.getScdType().split("\r\n"));
-//        List<String> generalRuleAppliedList = Arrays.asList(input.getGeneralRuleApplied().split("\r\n"));
-//        List<String> reasonAddedList = Arrays.asList(input.getReasonAdded().split("\r\n"));
-//        for (int i = 0; i < targetExtractList.size(); i++) {
-//            Field field = new Field();
-//            field.setInput(input);
-//            field.setTargetExtract(targetExtractList.get(i).toUpperCase().replace("BDE_", ""));
-//            String columnName = columnNameList.get(i).replace("(FK)", "")
-//                    .replace("(PK)", "").trim();
-//            field.setColumnName(columnName);
-//            field.setDatatype(datatypeList.get(i));
-//            field.setSourceTable(sourceTableList.get(i));
-//            field.setScdType(scdTypeList.get(i));
-//            try {
-//                field.setGeneralRuleApplied(generalRuleAppliedList.get(i));
-//            }
-//            catch(ArrayIndexOutOfBoundsException e) {
-//                field.setGeneralRuleApplied("");
-//            }
-//            field.setReasonAdded(reasonAddedList.get(i));
-//            if (columnNameList.get(i).contains("KEY")){
-//                String joinedTable;
-//                String primaryKeyOfJoinedTable;
-//                if(i == 0){
-//                    joinedTable = "Z_CS_" + field.getTargetExtract() + "_BASE";
-//                    primaryKeyOfJoinedTable = field.getColumnName();
-//                }else{
-//                    joinedTable = ScriptGenerator.generateJoinedTableName(sourceTableList.get(i));
-//                    primaryKeyOfJoinedTable = ScriptGenerator.generatePrimaryKeyOfJoinedTableName(sourceTableList.get(i));
-//                }
-//                field.setJoinedTable(joinedTable);
-//                field.setPrimaryKeyOfJoinedTable(primaryKeyOfJoinedTable);
-//            }
-//            saveField(field);
-//        }
-//    }
-
     public List<String> generateScripts(List<Field> allFields) {
-        ScriptGeneratorForCreatingEntitiesPCCC scriptGeneratorForCreatingEntitiesPCCC =
-                new ScriptGeneratorForCreatingEntitiesPCCC(allFields);
-        ScriptGeneratorForEditingEntitiesPCCC scriptGeneratorForEditingEntitiesPCCC =
-                new ScriptGeneratorForEditingEntitiesPCCC(allFields);
-        ScriptGeneratorForCreatingEntitiesBC scriptGeneratorForCreatingEntitiesBC =
-                new ScriptGeneratorForCreatingEntitiesBC(allFields);
         if (isNewEntity(allFields) && !isBC(allFields.get(0))){
+            ScriptGeneratorForCreatingEntitiesPCCC scriptGeneratorForCreatingEntitiesPCCC =
+                    new ScriptGeneratorForCreatingEntitiesPCCC(allFields);
             return Arrays.asList(
                     scriptGeneratorForCreatingEntitiesPCCC.generateDDLScript()
                     ,scriptGeneratorForCreatingEntitiesPCCC.generateDMLScript());
         } else if ((!isNewEntity(allFields) && !isBC(allFields.get(0)))){
+            ScriptGeneratorForEditingEntitiesPCCC scriptGeneratorForEditingEntitiesPCCC =
+                    new ScriptGeneratorForEditingEntitiesPCCC(allFields);
             return Arrays.asList(scriptGeneratorForEditingEntitiesPCCC.generateDDLScript()
                     ,scriptGeneratorForEditingEntitiesPCCC.generateDMLScript());
         } else {
+            ScriptGeneratorForCreatingEntitiesBC scriptGeneratorForCreatingEntitiesBC =
+                    new ScriptGeneratorForCreatingEntitiesBC(allFields);
             return Arrays.asList(scriptGeneratorForCreatingEntitiesBC.generateDDLScript()
                     ,scriptGeneratorForCreatingEntitiesBC.generateDMLScript());
         }

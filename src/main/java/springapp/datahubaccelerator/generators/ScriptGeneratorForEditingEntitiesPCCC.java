@@ -10,6 +10,8 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
     private List<Field> newFields;
     private String userStoryNumber;
     private String targetExtract;
+    private String pureTableName;
+    private String primaryTableName;
 
     public ScriptGeneratorForEditingEntitiesPCCC(List<Field> allFields) {
         Integer newestUserStoryNumber = getNewestUserStoryNumber(allFields);
@@ -18,7 +20,12 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 .collect(Collectors.toList());
         this.newFields = newFields;
         this.userStoryNumber = newestUserStoryNumber.toString();
-        this.targetExtract = newFields.get(0).getTargetExtract().toUpperCase();
+        this.targetExtract = newFields.get(0).getTargetExtract();
+        this.pureTableName = allFields.get(0).getJoinedTable()
+                .replace("_BASE", "")
+                .replace("Z_", "")
+                .replace("CS_", "");
+        this.primaryTableName = allFields.get(0).getJoinedTable();
     }
 
     public String generateDDLScript() {
@@ -34,32 +41,32 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
         List<Field> allKeyFields = getKeyFieldsList(newFields);
         String dmlPartScript ="";
         for (Field field : allKeyFields) {
-            dmlPartScript = dmlPartScript + generateSingleInsertion(field);
+            dmlPartScript = dmlPartScript + generateSingleInsertion(field, primaryTableName);
         }
-        return "/* User Story: " + userStoryNumber + "_Bde_" + generateEntityName(targetExtract) + " */\n" +
+        return "/* User Story: " + userStoryNumber + " " + generateEntityName(targetExtract) + "_Bde */\n" +
                 "\n" +
                 "/* MD_FK_REF Inserts */" +
                 dmlPartScript;
     }
 
     private String generateTRFPart() {
-        return "/* User Story: P17152_" +  userStoryNumber + "_" + targetExtract + " */\n" +
+        return "/* User Story: P17152_" +  userStoryNumber + "_" + generateEntityName(targetExtract) + " */\n" +
                 "\n" +
                 "/* TRF Changes */\n" +
                 "IF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'TRF_" + targetExtract + "'\n" +
+                "\t\t\tAND  TABLE_NAME = 'TRF_" + pureTableName + "'\n" +
                 "\t\t\tAND COLUMN_NAME IN (" +
                 listingOfColumnNames(newFields, 0) + ")))\n"+
                 "BEGIN\n" +
-                "\tALTER TABLE TRF_" + targetExtract + " \n" +
+                "\tALTER TABLE TRF_" + pureTableName + " \n" +
                 "\tADD" +
                 "\t" + generateRowsForScript(newFields, 0) +
                 "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][TRF] P17152-" + userStoryNumber +
-                ": TRF_" + targetExtract + "'\n";
+                ": TRF_" + pureTableName + "'\n";
     }
 
     private String generateODSBasePart(){
@@ -69,7 +76,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
         return "\nIF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'CS_" + targetExtract + "_BASE'\n" +
+                "\t\t\tAND  TABLE_NAME = 'CS_" + pureTableName + "_BASE'\n" +
                 "\t\t\tAND COLUMN_NAME IN (" +
                 listingOfColumnNames(newFields
                         .stream()
@@ -77,7 +84,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                         .collect(Collectors.toList()), 0) +
                 ")))\n" +
                 "BEGIN\n" +
-                "\tALTER TABLE CS_" + targetExtract + "_BASE\n" +
+                "\tALTER TABLE CS_" + pureTableName + "_BASE\n" +
                 "\tADD" +
                 generateRowsForScript(newFields
                         .stream()
@@ -86,7 +93,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] P17152-" + userStoryNumber +
-                ": CS_" + targetExtract + "_BASE'\n";
+                ": CS_" + pureTableName + "_BASE'\n";
     }
 
     private String generateODSDeltaPart(){
@@ -96,7 +103,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
         return "\nIF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'CS_" + targetExtract +"_DELTA'\n" +
+                "\t\t\tAND  TABLE_NAME = 'CS_" + pureTableName +"_DELTA'\n" +
                 "\t\t\tAND COLUMN_NAME IN (" +
                 listingOfColumnNames(newFields
                         .stream()
@@ -104,7 +111,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                         .collect(Collectors.toList()), 0) +
                 ")))\n" +
                 "BEGIN\n" +
-                "\tALTER TABLE CS_" + targetExtract + "_DELTA\n" +
+                "\tALTER TABLE CS_" + pureTableName + "_DELTA\n" +
                 "\tADD" +
                 generateRowsForScript(newFields
                         .stream()
@@ -113,14 +120,14 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] P17152-" + userStoryNumber +
-                ": CS_" + targetExtract + "_DELTA'";
+                ": CS_" + pureTableName + "_DELTA'";
     }
 
     private String generateConstraintsPart() {
         List<Field> allKeyFields = getKeyFieldsList(newFields);
         String constraintPartScript ="";
         for (Field field : allKeyFields) {
-            constraintPartScript = constraintPartScript + generateSingleConstraint(field);
+            constraintPartScript = constraintPartScript + generateSingleConstraint(field, primaryTableName);
         }
         if (!constraintPartScript.equals("")) {
             return "\n/* Constraints */\n" + constraintPartScript;
@@ -129,117 +136,13 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
         }
     }
 
-    private String generateSingleConstraint(Field field) {
-        String scdType;
-        if (field.getScdType().equals("1")){
-            scdType = "BASE";
-        } else {
-            scdType = "DELTA";
-        }
-        String pureJoinedTableName = field.getJoinedTable()
-                .replace("Z_CS_", "")
-                .replace("CS_", "")
-                .replace("_BASE", "")
-                .replace("_DELTA", "");
-        return "\nIF (EXISTS (SELECT * \n" +
-                "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
-                "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'Z_CS_" + targetExtract + "_" + scdType + "')\n" +
-                "\tAND EXISTS (SELECT * \n" +
-                "\t\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
-                "\t\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\t\tAND  TABLE_NAME = '" + field.getJoinedTable() + "')\n" +
-                "\tAND NOT EXISTS (SELECT * \n" +
-                "\t\t\t\t\tFROM sys.foreign_keys\n" +
-                "\t\t\t\t\tWHERE name = 'Z_FK_" + generateShortcut(targetExtract, scdType) +
-                "_" + generateShortcut(pureJoinedTableName, "BASE") + "')\n" +
-                "\t\t\t\t)\n" +
-                "BEGIN\n" +
-                "\n" +
-                "\tALTER TABLE [dbo].[Z_CS_" + targetExtract + "_" + scdType + "] ADD CONSTRAINT " +
-                "[Z_FK_" + generateShortcut(targetExtract, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") +
-                "] FOREIGN KEY([" + field.getColumnName() + "])\n" +
-                "\tREFERENCES [dbo].[" + field.getJoinedTable() + "] ([" + field.getColumnName() + "])\n" +
-                "END\n" +
-                "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][FK] " +
-                userStoryNumber + ": Z_FK_" +
-                generateShortcut(targetExtract, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") + "'\n";
-    }
-
     private String generateIndexesPart() {
         List<Field> allKeyFields = getKeyFieldsList(newFields);
         String indexPartScript ="";
         for (Field field : allKeyFields) {
-            indexPartScript = indexPartScript + generateSingleIndex(field);
+            indexPartScript = indexPartScript +
+                    generateSingleIndex(field.getScdType(), field.getColumnName(), field, primaryTableName);
         }
         return "\n/* Indexes */\n" + indexPartScript;
-    }
-
-    private String generateSingleIndex(Field field) {
-        String scdType;
-        if (field.getScdType().equals("1")){
-            scdType = "BASE";
-        } else {
-            scdType = "DELTA";
-        }
-        String pureJoinedTableName = field.getJoinedTable()
-                .replace("Z_CS_", "")
-                .replace("CS_", "")
-                .replace("_BASE", "")
-                .replace("_DELTA", "");
-        String foreginField = field.getColumnName().replace("_KEY", "");
-        return "\nIF (EXISTS (SELECT *\n" +
-                "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
-                "\t\t\tWHERE TABLE_SCHEMA = 'dbo'\n" +
-                "\t\t\tAND TABLE_NAME = 'Z_CS_" + targetExtract + "_" + scdType + "'\n" +
-                "\t\t\tAND COLUMN_NAME = '" + field.getColumnName() + "')\n" +
-                "\tAND NOT EXISTS (SELECT *\n" +
-                "\t\t\t\t\tFROM sys.indexes\n" +
-                "\t\t\t\t\tWHERE name = 'Z_FK_"  +
-                generateShortcut(targetExtract, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") + "_XFK')\n" +
-                "\t)\n" +
-                "BEGIN\n" +
-                "\tcreate nonclustered index Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "_XFK on Z_CS_" + targetExtract + "_" + scdType +
-                " (" + field.getColumnName() + " ASC)\n" +
-                "END\n" +
-                "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] " +
-                userStoryNumber +": Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "_XFK'\n";
-    }
-
-    private String generateSingleInsertion(Field field) {
-        String scdType;
-        if (field.getScdType().equals("1")){
-            scdType = "BASE";
-        } else {
-            scdType = "DELTA";
-        }
-        String foreginField = field.getColumnName().replace("_KEY", "");
-        return "\n/* Insert MD_FK_REF record: Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + " */\n" +
-                "IF (EXISTS (SELECT * \n" +
-                "\t\t\tFROM sys.foreign_keys\n" +
-                "\t\t\tWHERE name = 'Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "')\n" +
-                "\tAND NOT EXISTS (SELECT *\n" +
-                "\t\t\t\t\tFROM MD_FK_REF\n" +
-                "\t\t\t\t\tWHERE FK_CONSTR_NAME = 'Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "')\n" +
-                ")\n" +
-                "BEGIN\n" +
-                "\tINSERT INTO MD_FK_REF(TRF_NAME,FK_TAB_NAME,FK_COL_NAME,PK_TAB_NAME,PK_COL_NAME,LOB_CD,FK_CONSTR_NAME," +
-                "OOTB_FUTURE_USE_FL,MULTI_SRCE_FL,SELF_REF_FL) VALUES " +
-                "('Z_TRF_" + targetExtract + "','Z_CS_" + targetExtract + "_" + scdType + "','" + field.getColumnName() +
-                "','Z_CS_" + foreginField + "_BASE','" +field.getColumnName() + "','All','" +
-                "Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "','N','N','N');\n" +
-                "END\n" +
-                "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][MD_FK_REF] " + userStoryNumber +
-                ": Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "'\n";
     }
 }

@@ -12,6 +12,7 @@ public class ScriptGenerator {
     }
 
     String generateEntityName(String targetExtract) {
+        if (!targetExtract.contains("_")) return targetExtract;
         String entityName = "";
         List<String> splitedTargetExtract = Arrays.asList(targetExtract.toLowerCase().split("_"));
         for (String split : splitedTargetExtract) {
@@ -93,7 +94,7 @@ public class ScriptGenerator {
         return listingForScript;
     }
 
-    String generateShortcut(String targetExtract, String scdType) {
+    public String generateShortcut(String targetExtract, String scdType) {
         if (targetExtract.equals("ETL_LAST_UPDATE_DTS")) {
             return "XUPDT";
         }
@@ -156,10 +157,135 @@ public class ScriptGenerator {
             field.setSourceColumnName(fromJoinWhere.substring(positionOfFirstChar, positionOfLastChar));
         } else if (field.getColumnMapping().contains("TYPECODE")) {
             field.setSourceColumnName(field.getColumnName());
-        } else {
+        } else if (field.getColumnMapping().contains(" AS ")){
             positionOfFirstChar = field.getColumnMapping().indexOf(".") + 1;
             positionOfLastChar = field.getColumnMapping().indexOf(" ", positionOfFirstChar);
             field.setSourceColumnName(field.getColumnMapping().substring(positionOfFirstChar, positionOfLastChar));
+        } else {
+            field.setSourceColumnName(field.getColumnName());
         }
+    }
+
+    public String generateSingleConstraint(Field field, String primaryTableName) {
+        String scdType;
+        if (field.getScdType().equals("1")) {
+            scdType = "BASE";
+        } else {
+            scdType = "DELTA";
+        }
+        String pureTableName = primaryTableName
+                .replace("Z_CS_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "");
+        String pureJoinedTableName = field.getJoinedTable()
+                .replace("Z_CS_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "")
+                .replace("_DELTA", "");
+        return "\nIF (EXISTS (SELECT * \n" +
+                "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
+                "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
+                "\t\t\tAND  TABLE_NAME = '" + primaryTableName + "')\n" +
+                "\tAND EXISTS (SELECT * \n" +
+                "\t\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
+                "\t\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
+                "\t\t\t\tAND  TABLE_NAME = '" + field.getJoinedTable() + "')\n" +
+                "\tAND NOT EXISTS (SELECT * \n" +
+                "\t\t\t\t\tFROM sys.foreign_keys\n" +
+                "\t\t\t\t\tWHERE name = 'Z_FK_" + generateShortcut(pureTableName, scdType) +
+                "_" + generateShortcut(pureJoinedTableName, "BASE") + "')\n" +
+                "\t\t\t\t)\n" +
+                "BEGIN\n" +
+                "\n" +
+                "\tALTER TABLE [dbo].[" + primaryTableName + "] ADD CONSTRAINT " +
+                "[Z_FK_" + generateShortcut(pureTableName, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") +
+                "] FOREIGN KEY([" + field.getColumnName() + "])\n" +
+                "\tREFERENCES [dbo].[" + field.getJoinedTable() + "] ([" + field.getPrimaryKeyOfJoinedTable() + "])\n" +
+                "END\n" +
+                "ELSE\n" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][FK] " +
+                field.getReasonAdded() + ": Z_FK_" +
+                generateShortcut(pureTableName, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") + "'\n";
+    }
+
+    String generateSingleIndex(String scdType, String columnName, Field field, String primaryTableName) {
+        if (scdType.equals("1")) {
+            scdType = "BASE";
+        } else {
+            scdType = "DELTA";
+        }
+        String pureTableName = primaryTableName
+                .replace("Z_CS_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "");
+        String pureJoinedTableName = field.getJoinedTable()
+                .replace("Z_CS_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "")
+                .replace("_DELTA", "");
+        String index;
+        if (columnName.equals("ETL_LAST_UPDATE_DTS")) {
+            index = "Z_" + generateShortcut(pureTableName, scdType) + "_XUPDT";
+        } else {
+            index = "Z_FK_" + generateShortcut(pureTableName, scdType) + "_" +
+                    generateShortcut(pureJoinedTableName, "BASE") + "_XFK";
+        }
+        return "\nIF (EXISTS (SELECT *\n" +
+                "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
+                "\t\t\tWHERE TABLE_SCHEMA = 'dbo'\n" +
+                "\t\t\tAND TABLE_NAME = '" + primaryTableName + "'\n" +
+                "\t\t\tAND COLUMN_NAME = '" + columnName + "')\n" +
+                "\tAND NOT EXISTS (SELECT *\n" +
+                "\t\t\t\t\tFROM sys.indexes\n" +
+                "\t\t\t\t\tWHERE name = '" + index + "')\n" +
+                "\t)\n" +
+                "BEGIN\n" +
+                "\tcreate nonclustered index " + index + " on " + primaryTableName +
+                " (" + columnName + " ASC)\n" +
+                "END\n" +
+                "ELSE\n" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] " +
+                field.getReasonAdded() + ": " + index + "'\n";
+    }
+
+    String generateSingleInsertion(Field field, String primaryTableName) {
+        String scdType;
+        if (field.getScdType().equals("1")) {
+            scdType = "BASE";
+        } else {
+            scdType = "DELTA";
+        }
+        String pureTableName = primaryTableName
+                .replace("Z_CS_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "");
+        String pureJoinedTableName = field.getJoinedTable()
+                .replace("Z_CS_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "")
+                .replace("_DELTA", "");
+        return "\n/* Insert MD_FK_REF record: Z_FK_" + generateShortcut(pureTableName, scdType) + "_" +
+                generateShortcut(pureJoinedTableName, "BASE") + " */\n" +
+                "IF (EXISTS (SELECT * \n" +
+                "\t\t\tFROM sys.foreign_keys\n" +
+                "\t\t\tWHERE name = 'Z_FK_" + generateShortcut(pureTableName, scdType) + "_" +
+                generateShortcut(pureJoinedTableName, "BASE") + "')\n" +
+                "\tAND NOT EXISTS (SELECT *\n" +
+                "\t\t\t\t\tFROM MD_FK_REF\n" +
+                "\t\t\t\t\tWHERE FK_CONSTR_NAME = 'Z_FK_" + generateShortcut(pureTableName, scdType) + "_" +
+                generateShortcut(pureJoinedTableName, "BASE") + "')\n" +
+                ")\n" +
+                "BEGIN\n" +
+                "\tINSERT INTO MD_FK_REF(TRF_NAME,FK_TAB_NAME,FK_COL_NAME,PK_TAB_NAME,PK_COL_NAME,LOB_CD,FK_CONSTR_NAME," +
+                "OOTB_FUTURE_USE_FL,MULTI_SRCE_FL,SELF_REF_FL) \nVALUES " +
+                "('Z_TRF_" + pureTableName + "','" + primaryTableName + "','" + field.getColumnName() +
+                "','" + field.getJoinedTable() + "','" + field.getColumnName() + "','All','" +
+                "Z_FK_" + generateShortcut(pureTableName, scdType) + "_" +
+                generateShortcut(pureJoinedTableName, "BASE") + "','N','N','N');\n" +
+                "END\n" +
+                "ELSE\n" +
+                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][MD_FK_REF] " + field.getReasonAdded() +
+                ": Z_FK_" + generateShortcut(pureTableName, scdType) + "_" +
+                generateShortcut(pureJoinedTableName, "BASE") + "'\n\nGO\n";
     }
 }

@@ -9,14 +9,18 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
 
     private List<Field> allFields;
     private String targetExtract;
+    private String pureTableName;
     private String userStoryNumber;
     private String primaryKeyColumnName;
+    private String primaryTableName;
 
     public ScriptGeneratorForCreatingEntitiesPCCC(List<Field> allFields) {
         this.allFields = allFields;
-        this.targetExtract = allFields.get(0).getTargetExtract().toUpperCase();
+        this.targetExtract = allFields.get(0).getTargetExtract();
+        this.pureTableName = allFields.get(0).getColumnName().replace("_KEY", "");
         this.userStoryNumber = allFields.get(0).getReasonAdded();
         this.primaryKeyColumnName = allFields.get(0).getColumnName();
+        this.primaryTableName = allFields.get(0).getJoinedTable();
     }
 
     public String generateDDLScript() {
@@ -31,7 +35,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
         List<Field> allKeyFields = getKeyFieldsList(allFields);
         String dmlPartScript = "";
         for (Field field : allKeyFields) {
-            dmlPartScript = dmlPartScript + generateSingleInsertion(field);
+            dmlPartScript = dmlPartScript + generateSingleInsertion(field, primaryTableName);
         }
         return "/* User Story: " + userStoryNumber + "_Bde_" + generateEntityName(targetExtract) + " */\n" +
                 "\n" +
@@ -147,7 +151,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 .collect(Collectors.toList());
         String constraintPartScript = "";
         for (Field field : allKeyFields) {
-            constraintPartScript = constraintPartScript + generateSingleConstraint(field);
+            constraintPartScript = constraintPartScript + generateSingleConstraint(field, primaryTableName);
         }
         return "\n/* Constraints */" + constraintPartScript + "\nGO\n";
     }
@@ -158,114 +162,11 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 .collect(Collectors.toList());
         String indexPartScript = "";
         for (Field field : allKeyFields) {
-            indexPartScript = indexPartScript + generateSingleIndex(field.getScdType(), field.getColumnName());
+            indexPartScript = indexPartScript +
+                    generateSingleIndex(field.getScdType(), field.getColumnName(), field, primaryTableName);
         }
         return "\n/* Indexes */" + indexPartScript +
-                generateSingleIndex("1", "ETL_LAST_UPDATE_DTS") +
-                generateSingleIndex("2", "ETL_LAST_UPDATE_DTS") + "\nGO\n";
-    }
-
-    private String generateSingleConstraint(Field field) {
-        String scdType;
-        if (field.getScdType().equals("1")) {
-            scdType = "BASE";
-        } else {
-            scdType = "DELTA";
-        }
-        String pureJoinedTableName = field.getJoinedTable()
-                .replace("Z_CS_", "")
-                .replace("CS_", "")
-                .replace("_BASE", "")
-                .replace("_DELTA", "");
-        return "\nIF (EXISTS (SELECT * \n" +
-                "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
-                "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'Z_CS_" + targetExtract + "_" + scdType + "')\n" +
-                "\tAND EXISTS (SELECT * \n" +
-                "\t\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
-                "\t\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\t\tAND  TABLE_NAME = '" + field.getJoinedTable() + "')\n" +
-                "\tAND NOT EXISTS (SELECT * \n" +
-                "\t\t\t\t\tFROM sys.foreign_keys\n" +
-                "\t\t\t\t\tWHERE name = 'Z_FK_" + generateShortcut(targetExtract, scdType) +
-                "_" + generateShortcut(pureJoinedTableName, "BASE") + "')\n" +
-                "\t\t\t\t)\n" +
-                "BEGIN\n" +
-                "\n" +
-                "\tALTER TABLE [dbo].[Z_CS_" + targetExtract + "_" + scdType + "] ADD CONSTRAINT " +
-                "[Z_FK_" + generateShortcut(targetExtract, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") +
-                "] FOREIGN KEY([" + field.getColumnName() + "])\n" +
-                "\tREFERENCES [dbo].[" + field.getJoinedTable() + "] ([" + field.getPrimaryKeyOfJoinedTable() + "])\n" +
-                "END\n" +
-                "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][FK] " +
-                userStoryNumber + ": Z_FK_" +
-                generateShortcut(targetExtract, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") + "'\n";
-    }
-
-
-    private String generateSingleIndex(String scdType, String columnName) {
-        if (scdType.equals("1")) {
-            scdType = "BASE";
-        } else {
-            scdType = "DELTA";
-        }
-        String foreginField = columnName.replace("_KEY", "");
-        String index;
-        if (columnName.equals("ETL_LAST_UPDATE_DTS")) {
-            index = "Z_" + generateShortcut(targetExtract, scdType) + "_XUPDT";
-        } else {
-            index = "Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                    generateShortcut(foreginField, "BASE") + "_XFK";
-        }
-        return "\nIF (EXISTS (SELECT *\n" +
-                "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
-                "\t\t\tWHERE TABLE_SCHEMA = 'dbo'\n" +
-                "\t\t\tAND TABLE_NAME = 'Z_CS_" + targetExtract + "_" + scdType + "'\n" +
-                "\t\t\tAND COLUMN_NAME = '" + columnName + "')\n" +
-                "\tAND NOT EXISTS (SELECT *\n" +
-                "\t\t\t\t\tFROM sys.indexes\n" +
-                "\t\t\t\t\tWHERE name = '" + index + "')\n" +
-                "\t)\n" +
-                "BEGIN\n" +
-                "\tcreate nonclustered index " + index + " on Z_CS_" + targetExtract + "_" + scdType +
-                " (" + columnName + " ASC)\n" +
-                "END\n" +
-                "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] " +
-                userStoryNumber + ": " + index + "'\n";
-    }
-
-    private String generateSingleInsertion(Field field) {
-        String scdType;
-        if (field.getScdType().equals("1")) {
-            scdType = "BASE";
-        } else {
-            scdType = "DELTA";
-        }
-        String foreginField = field.getColumnName().replace("_KEY", "");
-        return "\n/* Insert MD_FK_REF record: Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + " */\n" +
-                "IF (EXISTS (SELECT * \n" +
-                "\t\t\tFROM sys.foreign_keys\n" +
-                "\t\t\tWHERE name = 'Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "')\n" +
-                "\tAND NOT EXISTS (SELECT *\n" +
-                "\t\t\t\t\tFROM MD_FK_REF\n" +
-                "\t\t\t\t\tWHERE FK_CONSTR_NAME = 'Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "')\n" +
-                ")\n" +
-                "BEGIN\n" +
-                "\tINSERT INTO MD_FK_REF(TRF_NAME,FK_TAB_NAME,FK_COL_NAME,PK_TAB_NAME,PK_COL_NAME,LOB_CD,FK_CONSTR_NAME," +
-                "OOTB_FUTURE_USE_FL,MULTI_SRCE_FL,SELF_REF_FL) \nVALUES " +
-                "('Z_TRF_" + targetExtract + "','Z_CS_" + targetExtract + "_" + scdType + "','" + field.getColumnName() +
-                "','Z_CS_" + foreginField + "_BASE','" + field.getColumnName() + "','All','" +
-                "Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "','N','N','N');\n" +
-                "END\n" +
-                "ELSE\n" +
-                "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][MD_FK_REF] " + userStoryNumber +
-                ": Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
-                generateShortcut(foreginField, "BASE") + "'\n\nGO\n";
+                generateSingleIndex("1", "ETL_LAST_UPDATE_DTS", allKeyFields.get(0), primaryTableName) +
+                generateSingleIndex("2", "ETL_LAST_UPDATE_DTS", allKeyFields.get(0), primaryTableName) + "\nGO\n";
     }
 }
