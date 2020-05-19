@@ -39,9 +39,9 @@ public class ScriptGenerator {
     }
 
     public static String generateJoinedTableName(String sourceTable) {
-        if (sourceTable.toUpperCase().contains("CC_")){
+        if (sourceTable.toUpperCase().contains("CC_")) {
             return "CS_" + sourceTable.toUpperCase().replace("CC_", "CLAIM_") + "_BASE";
-        } else if (sourceTable.toUpperCase().contains("PC_")){
+        } else if (sourceTable.toUpperCase().contains("PC_")) {
             return "CS_" + sourceTable.toUpperCase().replace("PC_", "") + "_BASE";
         } else {
             String foreignEntityName = sourceTable.toUpperCase()
@@ -67,7 +67,7 @@ public class ScriptGenerator {
         String rowsForScript = "";
         for (int i = id; i < allFields.size(); i++) {
             if (i == 0) {
-                rowsForScript = rowsForScript + "[" + allFields.get(i).getColumnName() + "]\t" +
+                rowsForScript = rowsForScript + "\n\t [" + allFields.get(i).getColumnName() + "]\t" +
                         handleDataType(allFields.get(i).getDatatype()) + "\t" +
                         handleGeneralRuleApplied(allFields.get(i).getGeneralRuleApplied());
             } else {
@@ -141,5 +141,25 @@ public class ScriptGenerator {
             return "bigint";
         }
         return dataType;
+    }
+
+    public static void extractSourceColumnName(Field field) {
+        int positionOfFirstChar;
+        int positionOfLastChar;
+        if (field.getColumnName().toUpperCase().contains("KEY")) {
+            String fromJoinWhere = Field.getFromJoinWhere();
+            positionOfFirstChar = fromJoinWhere.indexOf(field.getSourceTable());
+            fromJoinWhere = fromJoinWhere.substring(positionOfFirstChar);
+            positionOfFirstChar = fromJoinWhere.indexOf("=");
+            positionOfFirstChar = fromJoinWhere.indexOf(".", positionOfFirstChar) + 1;
+            positionOfLastChar = fromJoinWhere.indexOf("\n", positionOfFirstChar);
+            field.setSourceColumnName(fromJoinWhere.substring(positionOfFirstChar, positionOfLastChar));
+        } else if (field.getColumnMapping().contains("TYPECODE")) {
+            field.setSourceColumnName(field.getColumnName());
+        } else {
+            positionOfFirstChar = field.getColumnMapping().indexOf(".") + 1;
+            positionOfLastChar = field.getColumnMapping().indexOf(" ", positionOfFirstChar);
+            field.setSourceColumnName(field.getColumnMapping().substring(positionOfFirstChar, positionOfLastChar));
+        }
     }
 }

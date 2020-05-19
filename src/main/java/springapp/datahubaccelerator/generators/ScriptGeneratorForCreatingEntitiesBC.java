@@ -11,12 +11,14 @@ public class ScriptGeneratorForCreatingEntitiesBC extends ScriptGenerator {
     private String targetExtract;
     private String userStoryNumber;
     private String primaryKeyColumnName;
+    private String primaryKeyShortcut;
 
     public ScriptGeneratorForCreatingEntitiesBC(List<Field> allFields) {
         this.allFields = allFields;
         this.targetExtract = allFields.get(0).getTargetExtract().toUpperCase();
         this.userStoryNumber = allFields.get(0).getReasonAdded();
         this.primaryKeyColumnName = allFields.get(0).getColumnName();
+        this.primaryKeyShortcut  = getKeyShortcut(allFields.get(0).getColumnMapping());
     }
 
     public String generateDDLScript() {
@@ -44,13 +46,13 @@ public class ScriptGeneratorForCreatingEntitiesBC extends ScriptGenerator {
                 "\t\t\tAND  TABLE_NAME = 'Z_SBC_" + targetExtract + "'))\n" +
                 "BEGIN\n" +
                 "CREATE TABLE [Z_SBC_" + targetExtract + "] (\n" +
-                "\t PART_NO                 [int] NOT NULL\n" +
-                "\t,SOURCE_SYSTEM           [varchar](10) NOT NULL\n" +
-                "\t,PUBLICID                [varchar](20) NOT NULL\n" +
-                "\t,CASE_NO                 [varchar](255) NULL\n" +
-                "\t,CREATETIME              [datetime2](7) NOT NULL\n" +
-                "\t,UPDATETIME              [datetime2](7) NOT NULL\n" +
-                "\t,ID                      [bigint] NOT NULL" +
+                "\t [PART_NO]           [int] NOT NULL\n" +
+                "\t,[SOURCE_SYSTEM]     [varchar](10) NOT NULL\n" +
+                "\t,[PUBLICID]          [varchar](20) NOT NULL\n" +
+                "\t,[CASE_NO]           [varchar](255) NULL\n" +
+                "\t,[CREATETIME]        [datetime2](7) NOT NULL\n" +
+                "\t,[UPDATETIME]        [datetime2](7) NOT NULL\n" +
+                "\t,[ID]                [bigint] NOT NULL" +
                 generateRowsForSBC(allFields
                     .stream()
                     .filter(x -> !x.getColumnName().contains("ROW_PROC_DTS"))
@@ -181,39 +183,21 @@ public class ScriptGeneratorForCreatingEntitiesBC extends ScriptGenerator {
                 "BEGIN\n" +
                 "EXEC('CREATE VIEW [dbo].[Z_V_TRF_" + targetExtract + "]\n" +
                 "\tAS\n" +
-                "\tSELECT  " + BCgenerateRowsForTRF(allFields) +
-                "        ,CAST(DP.ID AS VARCHAR(100)) AS SRC_ID\n" +
-                "\t\t,UPPER(ACCT.SOURCE_SYSTEM + ''-'' + ACCT.BUS_KEY) AS BILL_ACCT_KEY\n" +
-                "\t\t,CASE WHEN DP.POLICYPERIODID IS NULL THEN ''NOKEY''\n" +
-                "            ELSE CASE WHEN PP.BUS_KEY IS NULL THEN CAST(DP.POLICYPERIODID AS VARCHAR(100)) ELSE UPPER(PP.SOURCE_SYSTEM + ''-'' + PP.BUS_KEY) END\n" +
-                "            END AS BILL_POL_PRD_KEY\n" +
-                "\t\t,UPPER(DEPLAN.SOURCE_SYSTEM + ''-'' + DEPLAN.BUS_KEY) AS DELNQNT_PLAN_KEY\n" +
-                "\t\t,CASE WHEN DP.INVOICE_BDE IS NULL THEN ''NOKEY''\n" +
-                "            ELSE CASE WHEN INV.BUS_KEY IS NULL THEN CAST(DP.INVOICE_BDE AS VARCHAR(100)) ELSE UPPER(INV.SOURCE_SYSTEM + ''-'' + INV.BUS_KEY) END\n" +
-                "            END AS BILL_INV_KEY\n" +
-                "\t\t,DP.SOURCE_SYSTEM AS SOURCE_SYSTEM\n" +
-                "\t\t,DP.UpdateTime AS ROW_PROC_DTS\n" +
-                "\t\t,DP.START_DTS AS START_DTS\n" +
-                "\t\t,DP.EXIT_DTS AS EXIT_DTS\n" +
-                "\t\t,COALESCE(DP.DELNQNT_PROC_SUBTYPE_CD, '' '') AS DELNQNT_PROC_SUBTYPE_CD\n" +
-                "\t\t,COALESCE(DP.DELNQNT_PROC_STAT_CD, '' '') AS DELNQNT_PROC_STAT_CD\n" +
-                "\t\t,COALESCE(DP.DELNQNT_AMT, 0) AS DELNQNT_AMT\n" +
-                "\t\t,COALESCE(CURR_CD, '' '') AS CURR_CD\n" +
-                "\t\t,COALESCE(REASON_CD, '' '') AS REASON_CD\n" +
-                "\t\t,CONVERT(DATE, DP.INCEPTION_DTS) AS INCEPTION_DT\n" +
-                "\t\t,DP.HELD_DTS AS HELD_DTS\n" +
-                "\t\t,COALESCE(PHASE_CD, '' '') AS PHASE_CD\n" +
-                "\t\t,COALESCE(DP.CASE_NO, '' '') AS CASE_NO\n" +
-                "\t\t,COALESCE(DP.RA_BACHEM_STAT, '' '') AS RA_BACHEM_STAT\n" +
-                "\t\t,COALESCE(SEPA_ERROR_REASON_CD, '' '') AS SEPA_ERROR_REASON_CD\n" +
-                "\t\t,DP.ID AS X_SEQ_NO\n" +
-                "\t\t,DP.UPDATETIME AS ETL_ROW_EFF_DTS\n" +
+                "\tSELECT  " + BCgenerateKeyRowsForTRF(allFields.stream()
+                        .filter(x -> x.getColumnName().contains("KEY"))
+                        .collect(Collectors.toList())) +
+                "\t\t," + primaryKeyShortcut + ".SOURCE_SYSTEM AS SOURCE_SYSTEM\n" +
+                "\t\t," + primaryKeyShortcut + ".UpdateTime AS ROW_PROC_DTS\n" +
+                BCgenerateNoKeyRowsForTRF(allFields.stream()
+                        .filter(x -> !x.getColumnName().contains("KEY"))
+                        .filter(x -> !x.getColumnName().equalsIgnoreCase("SOURCE_SYSTEM"))
+                        .filter(x -> !x.getColumnName().contains("ROW_PROC_DTS"))
+                        .collect(Collectors.toList())) +
+                "\t," + primaryKeyShortcut + ".ID AS X_SEQ_NO\n" +
+                "\t," + primaryKeyShortcut +".UPDATETIME AS ETL_ROW_EFF_DTS\n" +
                 "\t\t\n" +
-                "\tFROM Z_SBC_DELNQNT_PROC DP\n" +
-                "\t  LEFT JOIN KBC_ACCOUNT ACCT ON ACCT.SRC_ID = DP.ACCOUNTID\n" +
-                "\t  LEFT JOIN KBC_POLICYPERIOD PP ON PP.SRC_ID = DP.POLICYPERIODID\n" +
-                "\t  LEFT JOIN KBC_PLAN DEPLAN ON DEPLAN.SRC_ID = DP.DELINQUENCYPLANID\n" +
-                "\t  LEFT JOIN KBC_INVOICE INV ON INV.SRC_ID = DP.INVOICE_BDE')\n" +
+                "\tFROM Z_SBC_" + targetExtract + " " + primaryKeyShortcut + "\n" +
+                generateJoinsForTRF(Field.getFromJoinWhere()) +
                 "\t;\n" +
                 "END\n" +
                 "ELSE\n" +
@@ -228,46 +212,104 @@ public class ScriptGeneratorForCreatingEntitiesBC extends ScriptGenerator {
                 rowsForSBC = rowsForSBC + "\n\t,[" +
                         handleColumnNameForSBC(allFields.get(i)) + "]\t" +
                         handleDataType(allFields.get(i).getDatatype()) + "\t" +
-                        "NULL";
+                        handleGeneralRuleAppliedForSBC(allFields.get(i).getGeneralRuleApplied());
         }
         return rowsForSBC;
     }
 
     private String handleColumnNameForSBC(Field field) {
         if (field.getColumnName().toUpperCase().contains("KEY")) {
-            return field.getColumnName().replace("KEY", "ID");
+            return field.getSourceColumnName();
         }
-        if (field.getColumnMapping().toUpperCase().contains("TYPECODE")) {
+        if (field.getColumnMapping().contains("TYPECODE")) {
             return field.getColumnName();
         }
-        int positionOfFirstChar = field.getColumnMapping().indexOf(".") + 1;
-        int positionOfLastChar = field.getColumnMapping().indexOf(" ", positionOfFirstChar);
-        return field.getColumnMapping().substring(positionOfFirstChar, positionOfLastChar);
+        return field.getSourceColumnName();
     }
 
-    private String BCgenerateRowsForTRF(List<Field> allFields) {
+    private String handleGeneralRuleAppliedForSBC(String generalRuleApplied) {
+        if (generalRuleApplied.equals("")){
+            return "NULL";
+        }
+        return  "NOT NULL";
+    }
+
+    private String BCgenerateNoKeyRowsForTRF(List<Field> allFields) {
         String rowsForTRF = "";
-        String columnMapping;
         for (int i = 0; i < allFields.size() - 1; i++) {
-            columnMapping = allFields.get(i).getColumnMapping().toUpperCase();
-            if (columnMapping.startsWith("UPPER")){
-                int locationOfLastCharOfKeyShortcatInTheMapping = columnMapping.indexOf(".");
-                String keyShortcut = columnMapping.substring(0, locationOfLastCharOfKeyShortcatInTheMapping);
-                int locationOfFirstCharOfKeyShortcatInTheMapping = keyShortcut.lastIndexOf(" ");
-                keyShortcut = keyShortcut.substring(locationOfFirstCharOfKeyShortcatInTheMapping);
-                if (i == 0){
-                    rowsForTRF += columnMapping
-                            .replace("@PV_SOURCESYSTEM", keyShortcut + ".SOURCE_SYSTEM")
-                            .replace("\'", "\'\'") +
-                            "\n\t,CAST(" + keyShortcut + ".ID AS VARCHAR(100)) AS SRC_ID\n\t";
-                } else {
-                    rowsForTRF += "," + columnMapping
-                            .replace("@PV_SOURCESYSTEM", keyShortcut + ".SOURCE_SYSTEM")
-                            .replace("\'", "\'\'")
-                            .replace("PUBLICID", "BUS_KEY") + "\n\t";
-                }
+            Field field = allFields.get(i);
+            if (field.getGeneralRuleApplied().equalsIgnoreCase("General Rule 1")) {
+                rowsForTRF += "\t,COALESCE(" + primaryKeyShortcut + "." + field.getSourceColumnName() + " '' '') " +
+                        "AS " + field.getColumnName() + "\n";
+            } else if (field.getGeneralRuleApplied().equalsIgnoreCase("General Number Rule 1")){
+                rowsForTRF += "\t,COALESCE(" + primaryKeyShortcut + "." + field.getSourceColumnName() + " 0) " +
+                        "AS " + field.getColumnName() + "\n";
+            } else if (field.getColumnMapping().contains("CAST")) {
+                rowsForTRF += "\t,CONVERT(" + field.getDatatype() + ", " + primaryKeyShortcut + "." +
+                        field.getSourceColumnName() + ") AS " + field.getColumnName() + "\n";
+            } else {
+                rowsForTRF += field.getColumnMapping() + "\n";
             }
         }
         return rowsForTRF;
     }
+
+    private String BCgenerateKeyRowsForTRF(List<Field> allFields) {
+        String keyRowsForTRF = "";
+        for (int i = 0; i < allFields.size(); i++) {
+            Field field = allFields.get(i);
+            String keyShortcut = getKeyShortcut(field.getColumnMapping());
+            if (field.getColumnMapping().startsWith("UPPER") || field.getColumnMapping().startsWith(",UPPER")) {
+                if (i == 0) {
+                    keyRowsForTRF += field.getColumnMapping()
+                            .replace("@PV_SOURCESYSTEM", keyShortcut + ".SOURCE_SYSTEM")
+                            .replace("\'", "\'\'") +
+                            "\n\t,CAST(" + keyShortcut + ".ID AS VARCHAR(100)) AS SRC_ID\n\t";
+                } else {
+                    keyRowsForTRF += "," + field.getColumnMapping()
+                            .replace("@PV_SOURCESYSTEM", keyShortcut + ".SOURCE_SYSTEM")
+                            .replace("\'", "\'\'")
+                            .replace("PUBLICID", "BUS_KEY") + "\n\t";
+                }
+            } else if (field.getColumnMapping().startsWith("CASE") || field.getColumnMapping().startsWith(",CASE")) {
+                keyRowsForTRF += "," + field.getColumnMapping()
+                        .replace("\'", "\'\'")
+                        .replace("PUBLICID", "BUS_KEY")
+                        .replace("@PV_SOURCESYSTEM", keyShortcut + ".SOURCE_SYSTEM")
+                        .replace("END AS", "\tEND AS") + "\n\t";
+            }
+        }
+        return keyRowsForTRF;
+    }
+
+    private String getKeyShortcut(String columnMapping) {
+        int locationOfLastCharOfKeyShortcatInTheMapping = columnMapping.indexOf(".");
+        String keyShortcut = columnMapping.substring(0, locationOfLastCharOfKeyShortcatInTheMapping);
+        int locationOfFirstCharOfKeyShortcatInTheMapping;
+        if (keyShortcut.contains(" ")){
+            locationOfFirstCharOfKeyShortcatInTheMapping = keyShortcut.lastIndexOf(" ");
+        } else {
+            locationOfFirstCharOfKeyShortcatInTheMapping = keyShortcut.lastIndexOf(",");
+        }
+        keyShortcut = keyShortcut.substring(locationOfFirstCharOfKeyShortcatInTheMapping);
+        return keyShortcut;
+    }
+
+    private String generateJoinsForTRF(String fromJoinWhere){
+        String joinsForTRF = "";
+        String singleJoin;
+        int index;
+        index = fromJoinWhere.indexOf("FROM");
+        index = fromJoinWhere.indexOf("\n", index);
+        fromJoinWhere = fromJoinWhere.substring(index + 1);
+        while (!fromJoinWhere.startsWith("\n")){
+                index = fromJoinWhere.indexOf("\n");
+                singleJoin = fromJoinWhere.substring(0, index);
+                joinsForTRF += singleJoin.replace("BC_", "KBC_")
+                        .replace("ID", "SRC_ID") + "\n";
+                fromJoinWhere = fromJoinWhere.substring(index + 1);
+        }
+        return joinsForTRF;
+    }
+
 }

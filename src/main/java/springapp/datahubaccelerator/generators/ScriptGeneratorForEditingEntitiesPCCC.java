@@ -171,32 +171,38 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
         List<Field> allKeyFields = getKeyFieldsList(newFields);
         String indexPartScript ="";
         for (Field field : allKeyFields) {
-            indexPartScript = indexPartScript + generateSingleIndex(field.getScdType(), field.getColumnName());
+            indexPartScript = indexPartScript + generateSingleIndex(field);
         }
         return "\n/* Indexes */\n" + indexPartScript;
     }
 
-    private String generateSingleIndex(String scdType, String columnName) {
-        if (scdType.equals("1")){
+    private String generateSingleIndex(Field field) {
+        String scdType;
+        if (field.getScdType().equals("1")){
             scdType = "BASE";
         } else {
             scdType = "DELTA";
         }
-        String foreginField = columnName.replace("_KEY", "");
+        String pureJoinedTableName = field.getJoinedTable()
+                .replace("Z_CS_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "")
+                .replace("_DELTA", "");
+        String foreginField = field.getColumnName().replace("_KEY", "");
         return "\nIF (EXISTS (SELECT *\n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo'\n" +
                 "\t\t\tAND TABLE_NAME = 'Z_CS_" + targetExtract + "_" + scdType + "'\n" +
-                "\t\t\tAND COLUMN_NAME = '" + columnName + "')\n" +
+                "\t\t\tAND COLUMN_NAME = '" + field.getColumnName() + "')\n" +
                 "\tAND NOT EXISTS (SELECT *\n" +
                 "\t\t\t\t\tFROM sys.indexes\n" +
                 "\t\t\t\t\tWHERE name = 'Z_FK_"  +
-                generateShortcut(targetExtract, scdType) + "_" + generateShortcut(foreginField, "BASE") + "_XFK')\n" +
+                generateShortcut(targetExtract, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") + "_XFK')\n" +
                 "\t)\n" +
                 "BEGIN\n" +
                 "\tcreate nonclustered index Z_FK_" + generateShortcut(targetExtract, scdType) + "_" +
                 generateShortcut(foreginField, "BASE") + "_XFK on Z_CS_" + targetExtract + "_" + scdType +
-                " (" + columnName + " ASC)\n" +
+                " (" + field.getColumnName() + " ASC)\n" +
                 "END\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] " +

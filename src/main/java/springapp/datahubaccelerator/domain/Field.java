@@ -37,8 +37,12 @@ public class Field {
     @Column(length = COLUMNS_LENGTH)
     private String columnMapping;
 
+    @Column(length = COLUMNS_LENGTH)
+    private static String fromJoinWhere;
+
     private String joinedTable;
     private String primaryKeyOfJoinedTable;
+    private String sourceColumnName;
 
     public Field() {
     }
@@ -123,11 +127,27 @@ public class Field {
         this.columnMapping = columnMapping;
     }
 
+    public static String getFromJoinWhere() {
+        return fromJoinWhere;
+    }
+
+    public static void setFromJoinWhere(String fromJoinWhere) {
+        Field.fromJoinWhere = fromJoinWhere;
+    }
+
     public String getPrimaryKeyOfJoinedTable() {
         return primaryKeyOfJoinedTable;
     }
 
     public void setPrimaryKeyOfJoinedTable(String primaryKeyOfJoinedTable) {
         this.primaryKeyOfJoinedTable = primaryKeyOfJoinedTable;
+    }
+
+    public String getSourceColumnName() {
+        return sourceColumnName;
+    }
+
+    public void setSourceColumnName(String sourceColumnName) {
+        this.sourceColumnName = sourceColumnName;
     }
 }

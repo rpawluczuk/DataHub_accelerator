@@ -72,6 +72,7 @@ public class ExcelInputController {
         Sheet sheet = excelComponent.getListOfSheets().stream()
                 .filter(s -> s.getSheetName().equals(choosenSheetName))
                 .findFirst().get();
+        Field.setFromJoinWhere(sheet.getRow(3).getCell(19).getStringCellValue().toUpperCase());
         for (int i = 3; !sheet.getRow(i).getCell(1).getStringCellValue().isEmpty(); i++) {
             Field field = new Field();
             field.setTargetExtract(sheet.getRow(i).getCell(1).getStringCellValue()
@@ -84,8 +85,8 @@ public class ExcelInputController {
             } else {
                 field.setScdType("" + (int) sheet.getRow(i).getCell(8).getNumericCellValue());
             }
-            field.setSourceTable(sheet.getRow(i).getCell(16).getStringCellValue());
-            field.setColumnMapping(sheet.getRow(i).getCell(18).getStringCellValue());
+            field.setSourceTable(sheet.getRow(i).getCell(16).getStringCellValue().toUpperCase());
+            field.setColumnMapping(sheet.getRow(i).getCell(18).getStringCellValue().toUpperCase());
             field.setGeneralRuleApplied(sheet.getRow(i).getCell(36).getStringCellValue());
             field.setReasonAdded(sheet.getRow(i).getCell(40).getStringCellValue());
             if (field.getColumnName().contains("KEY")) {
@@ -101,6 +102,7 @@ public class ExcelInputController {
                 field.setJoinedTable(joinedTable);
                 field.setPrimaryKeyOfJoinedTable(primaryKeyOfJoinedTable);
             }
+            ScriptGenerator.extractSourceColumnName(field);
             fieldRepository.save(field);
         }
         return "redirect:/excel/rowgenerator";
