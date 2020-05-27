@@ -2,6 +2,7 @@ package springapp.datahubaccelerator.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import springapp.datahubaccelerator.Components.FormHandlerComponent;
 import springapp.datahubaccelerator.domain.Field;
 import springapp.datahubaccelerator.domain.repository.FieldRepository;
 import springapp.datahubaccelerator.generators.ScriptGenerator;
@@ -19,6 +20,9 @@ public class FieldService {
     @Autowired
     FieldRepository fieldRepository;
 
+    @Autowired
+    FormHandlerComponent formHandlerComponent;
+
     public void saveField(Field field) {
         fieldRepository.save(field);
     }
@@ -28,17 +32,32 @@ public class FieldService {
     }
 
     public List<String> generateScripts(List<Field> allFields) {
-        if (isNewEntity(allFields) && !isBC(allFields.get(0))){
-            ScriptGeneratorForCreatingEntitiesPCCC scriptGeneratorForCreatingEntitiesPCCC =
-                    new ScriptGeneratorForCreatingEntitiesPCCC(allFields);
-            return Arrays.asList(
-                    scriptGeneratorForCreatingEntitiesPCCC.generateDDLScript()
-                    ,scriptGeneratorForCreatingEntitiesPCCC.generateDMLScript());
-        } else if ((!isNewEntity(allFields) && !isBC(allFields.get(0)))){
-            ScriptGeneratorForEditingEntitiesPCCC scriptGeneratorForEditingEntitiesPCCC =
-                    new ScriptGeneratorForEditingEntitiesPCCC(allFields);
-            return Arrays.asList(scriptGeneratorForEditingEntitiesPCCC.generateDDLScript()
-                    ,scriptGeneratorForEditingEntitiesPCCC.generateDMLScript());
+        List<Field> selectedFields;
+        if (formHandlerComponent.getSelectedUserStories().size() > 0) {
+            selectedFields = allFields.stream()
+                    .filter(x -> formHandlerComponent.getSelectedUserStories().contains(x.getReasonAdded()))
+                    .collect(Collectors.toList());
+        } else if (!isNewEntity(allFields)){
+                Integer newestUserStoryNumber = getNewestUserStoryNumber(allFields);
+                 selectedFields = allFields.stream()
+                        .filter(f -> f.getReasonAdded().contains(newestUserStoryNumber.toString()))
+                        .collect(Collectors.toList());
+        } else {
+            selectedFields = allFields;
+        }
+        if (!isBC(allFields.get(0))){
+            if (allFields.size() == selectedFields.size()){
+                ScriptGeneratorForCreatingEntitiesPCCC scriptGeneratorForCreatingEntitiesPCCC =
+                        new ScriptGeneratorForCreatingEntitiesPCCC(allFields);
+                return Arrays.asList(
+                        scriptGeneratorForCreatingEntitiesPCCC.generateDDLScript()
+                        ,scriptGeneratorForCreatingEntitiesPCCC.generateDMLScript());
+            } else {
+                ScriptGeneratorForEditingEntitiesPCCC scriptGeneratorForEditingEntitiesPCCC =
+                        new ScriptGeneratorForEditingEntitiesPCCC(allFields);
+                return Arrays.asList(scriptGeneratorForEditingEntitiesPCCC.generateDDLScript()
+                        ,scriptGeneratorForEditingEntitiesPCCC.generateDMLScript());
+            }
         } else {
             ScriptGeneratorForCreatingEntitiesBC scriptGeneratorForCreatingEntitiesBC =
                     new ScriptGeneratorForCreatingEntitiesBC(allFields);
@@ -60,6 +79,14 @@ public class FieldService {
             return true;
         }
         return false;
+    }
+
+    public static Integer getNewestUserStoryNumber(List<Field> allFields) {
+        return allFields.stream()
+                .filter(f -> !f.getReasonAdded().toUpperCase().equals("BASE"))
+                .map(f -> f.getReasonAdded().replace("P17152-", ""))
+                .map(s -> Integer.valueOf(s))
+                .max(Integer::compare).get();
     }
 
 

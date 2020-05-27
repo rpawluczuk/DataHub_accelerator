@@ -14,6 +14,20 @@
     <h2 class="font-weight-bold">Check if the rows meet your expectations. If not, the reason is a mistake
         in the data which you sent. To fix it return to the start page, make corrections in the input and try again</h2>
     <br/>
+    <form class="form-horizontal" th:action="@{/handleSelectedUserStories}" method="post" th:object="${formHandlerComponent}">
+        <ul>
+            <li th:each="userStory: ${userStories}">
+                <input type="checkbox"
+                       th:field="*{selectedUserStories}"
+                       th:value="${userStory}" />
+                <label th:for="${#ids.prev('selectedUserStories')}" th:text="${userStory}"></label>
+            </li>
+        </ul>
+        <div class="row">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+
     <table class="table table-striped table-dark">
         <thead>
         <tr>
