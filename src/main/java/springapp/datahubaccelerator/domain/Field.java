@@ -43,6 +43,7 @@ public class Field {
     private String joinedTable;
     private String primaryKeyOfJoinedTable;
     private String sourceColumnName;
+    private static String primaryTable;
 
     public Field() {
     }
@@ -149,5 +150,13 @@ public class Field {
 
     public void setSourceColumnName(String sourceColumnName) {
         this.sourceColumnName = sourceColumnName;
+    }
+
+    public static String getPrimaryTable() {
+        return primaryTable;
+    }
+
+    public static void setPrimaryTable(String primaryTable) {
+        Field.primaryTable = primaryTable;
     }
 }

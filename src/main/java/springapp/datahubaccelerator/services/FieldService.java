@@ -48,19 +48,19 @@ public class FieldService {
         if (!isBC(allFields.get(0))){
             if (allFields.size() == selectedFields.size()){
                 ScriptGeneratorForCreatingEntitiesPCCC scriptGeneratorForCreatingEntitiesPCCC =
-                        new ScriptGeneratorForCreatingEntitiesPCCC(allFields);
+                        new ScriptGeneratorForCreatingEntitiesPCCC(selectedFields);
                 return Arrays.asList(
                         scriptGeneratorForCreatingEntitiesPCCC.generateDDLScript()
                         ,scriptGeneratorForCreatingEntitiesPCCC.generateDMLScript());
             } else {
                 ScriptGeneratorForEditingEntitiesPCCC scriptGeneratorForEditingEntitiesPCCC =
-                        new ScriptGeneratorForEditingEntitiesPCCC(allFields);
+                        new ScriptGeneratorForEditingEntitiesPCCC(selectedFields);
                 return Arrays.asList(scriptGeneratorForEditingEntitiesPCCC.generateDDLScript()
                         ,scriptGeneratorForEditingEntitiesPCCC.generateDMLScript());
             }
         } else {
             ScriptGeneratorForCreatingEntitiesBC scriptGeneratorForCreatingEntitiesBC =
-                    new ScriptGeneratorForCreatingEntitiesBC(allFields);
+                    new ScriptGeneratorForCreatingEntitiesBC(selectedFields);
             return Arrays.asList(scriptGeneratorForCreatingEntitiesBC.generateDDLScript()
                     ,scriptGeneratorForCreatingEntitiesBC.generateDMLScript());
         }

@@ -39,28 +39,38 @@ public class ScriptGenerator {
                 .collect(Collectors.toList());
     }
 
-    public static String generateJoinedTableName(String sourceTable) {
-        if (sourceTable.toUpperCase().contains("CC_")) {
-            return "CS_" + sourceTable.toUpperCase().replace("CC_", "CLAIM_") + "_BASE";
-        } else if (sourceTable.toUpperCase().contains("PC_")) {
-            return "CS_" + sourceTable.toUpperCase().replace("PC_", "") + "_BASE";
+    public static String generateJoinedTableName(String sourceTable, String columnName) {
+        if (sourceTable.contains("\n")){
+            return "Z_CS_" + columnName.replace("_KEY", "") + "_BASE";
+        }
+        String pureSourceTable = sourceTable
+                .replace("CC_CLAIM", "CLAIM_")
+                .replace("CC_", "CLAIM_")
+                .replace("PC_", "")
+                .replace("CCX_", "")
+                .replace("PCX_", "")
+                .replace("_BDE", "")
+                .replace("_EXT", "")
+                .trim();
+        if (sourceTable.contains("CC_") || sourceTable.contains("PC_")) {
+            return "CS_" + pureSourceTable + "_BASE";
         } else {
-            String foreignEntityName = sourceTable.toUpperCase()
-                    .replace("CCX_", "")
-                    .replace("PCX_", "")
-                    .replace("_EXT", "")
-                    .trim();
-            return "Z_CS_" + foreignEntityName + "_BASE";
+            return "Z_CS_" + pureSourceTable + "_BASE";
         }
     }
 
-    public static String generatePrimaryKeyOfJoinedTableName(String sourceTable) {
+    public static String generatePrimaryKeyOfJoinedTableName(String sourceTable, String columnName) {
+        if (sourceTable.contains("\n")){
+            return columnName;
+        }
         String foreignEntityName = sourceTable.toUpperCase()
+                .replace("CC_CLAIM", "CLAIM_")
                 .replace("CC_", "CLAIM_")
                 .replace("CCX_", "")
                 .replace("PCX_", "")
                 .replace("_EXT", "")
-                .replace("PC_", "").trim();
+                .replace("PC_", "")
+                .replace("_BDE", "").trim();
         return foreignEntityName + "_KEY";
     }
 
@@ -84,7 +94,7 @@ public class ScriptGenerator {
         String listingForScript = "";
         for (int i = id; i < newFields.size(); i++) {
             if (i == 0) {
-                listingForScript = listingForScript + "\n\t\t\t\t\t'" + newFields.get(i).getColumnName().replace("(PK)", "")
+                listingForScript = listingForScript + "\n\t\t\t\t\t '" + newFields.get(i).getColumnName().replace("(PK)", "")
                         .replace("(FK)", "").trim() + "'";
             } else {
                 listingForScript = listingForScript + "\n\t\t\t\t\t,'" + newFields.get(i).getColumnName().replace("(PK)", "")
@@ -182,6 +192,7 @@ public class ScriptGenerator {
                 .replace("CS_", "")
                 .replace("_BASE", "")
                 .replace("_DELTA", "");
+        primaryTableName = primaryTableName.replace("BASE", "") + scdType;
         return "\nIF (EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
@@ -205,7 +216,7 @@ public class ScriptGenerator {
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][FK] " +
                 field.getReasonAdded() + ": Z_FK_" +
-                generateShortcut(pureTableName, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") + "'\n";
+                generateShortcut(pureTableName, scdType) + "_" + generateShortcut(pureJoinedTableName, "BASE") + "'\n\nGO\n";
     }
 
     String generateSingleIndex(String scdType, String columnName, Field field, String primaryTableName) {
@@ -223,6 +234,7 @@ public class ScriptGenerator {
                 .replace("CS_", "")
                 .replace("_BASE", "")
                 .replace("_DELTA", "");
+        primaryTableName = primaryTableName.replace("BASE", "") + scdType;
         String index;
         if (columnName.equals("ETL_LAST_UPDATE_DTS")) {
             index = "Z_" + generateShortcut(pureTableName, scdType) + "_XUPDT";
@@ -245,7 +257,7 @@ public class ScriptGenerator {
                 "END\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][index] " +
-                field.getReasonAdded() + ": " + index + "'\n";
+                field.getReasonAdded() + ": " + index + "'\n\nGO\n";
     }
 
     String generateSingleInsertion(Field field, String primaryTableName) {
@@ -264,6 +276,15 @@ public class ScriptGenerator {
                 .replace("CS_", "")
                 .replace("_BASE", "")
                 .replace("_DELTA", "");
+        String extensionPrefix = "";
+        if (primaryTableName.startsWith("Z_")){
+            extensionPrefix = "Z_";
+        }
+        String scope = "All";
+        if (field.getSourceTable().startsWith("CC")){
+            scope = "CLAIMS";
+        }
+        primaryTableName = primaryTableName.replace("BASE", "") + scdType;
         return "\n/* Insert MD_FK_REF record: Z_FK_" + generateShortcut(pureTableName, scdType) + "_" +
                 generateShortcut(pureJoinedTableName, "BASE") + " */\n" +
                 "IF (EXISTS (SELECT * \n" +
@@ -277,9 +298,9 @@ public class ScriptGenerator {
                 ")\n" +
                 "BEGIN\n" +
                 "\tINSERT INTO MD_FK_REF(TRF_NAME,FK_TAB_NAME,FK_COL_NAME,PK_TAB_NAME,PK_COL_NAME,LOB_CD,FK_CONSTR_NAME," +
-                "OOTB_FUTURE_USE_FL,MULTI_SRCE_FL,SELF_REF_FL) \nVALUES " +
-                "('Z_TRF_" + pureTableName + "','" + primaryTableName + "','" + field.getColumnName() +
-                "','" + field.getJoinedTable() + "','" + field.getColumnName() + "','All','" +
+                "OOTB_FUTURE_USE_FL,MULTI_SRCE_FL,SELF_REF_FL) \n\tVALUES " +
+                "('" + extensionPrefix + "TRF_" + pureTableName + "','" + primaryTableName + "','" + field.getColumnName() +
+                "','" + field.getJoinedTable() + "','" + field.getPrimaryKeyOfJoinedTable() + "','" + scope + "','" +
                 "Z_FK_" + generateShortcut(pureTableName, scdType) + "_" +
                 generateShortcut(pureJoinedTableName, "BASE") + "','N','N','N');\n" +
                 "END\n" +

@@ -13,24 +13,19 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
     private String pureTableName;
     private String primaryTableName;
 
-    public ScriptGeneratorForEditingEntitiesPCCC(List<Field> allFields) {
-        Integer newestUserStoryNumber = getNewestUserStoryNumber(allFields);
-        List<Field> newFields = allFields.stream()
-                .filter(f -> f.getReasonAdded().contains(newestUserStoryNumber.toString()))
-                .collect(Collectors.toList());
+    public ScriptGeneratorForEditingEntitiesPCCC(List<Field> newFields) {
         this.newFields = newFields;
-        this.userStoryNumber = newestUserStoryNumber.toString();
+        this.userStoryNumber = newFields.get(0).getReasonAdded();
         this.targetExtract = newFields.get(0).getTargetExtract();
-        this.pureTableName = allFields.get(0).getJoinedTable()
-                .replace("_BASE", "")
-                .replace("Z_", "")
-                .replace("CS_", "");
-        this.primaryTableName = allFields.get(0).getJoinedTable();
+        this.pureTableName = Field.getPrimaryTable().replace("Z_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "");
+        this.primaryTableName = Field.getPrimaryTable();
     }
 
     public String generateDDLScript() {
         return generateTRFPart() +
-                "\n/* ODS Changes */\n" +
+                "\n/* ODS Changes */" +
                 generateODSBasePart() +
                 generateODSDeltaPart() +
                 generateConstraintsPart() +
@@ -39,7 +34,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
 
     public String generateDMLScript() {
         List<Field> allKeyFields = getKeyFieldsList(newFields);
-        String dmlPartScript ="";
+        String dmlPartScript = "";
         for (Field field : allKeyFields) {
             dmlPartScript = dmlPartScript + generateSingleInsertion(field, primaryTableName);
         }
@@ -50,7 +45,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
     }
 
     private String generateTRFPart() {
-        return "/* User Story: P17152_" +  userStoryNumber + "_" + generateEntityName(targetExtract) + " */\n" +
+        return "/* User Story: P17152_" + userStoryNumber + "_" + generateEntityName(targetExtract) + " */\n" +
                 "\n" +
                 "/* TRF Changes */\n" +
                 "IF (NOT EXISTS (SELECT * \n" +
@@ -58,7 +53,7 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
                 "\t\t\tAND  TABLE_NAME = 'TRF_" + pureTableName + "'\n" +
                 "\t\t\tAND COLUMN_NAME IN (" +
-                listingOfColumnNames(newFields, 0) + ")))\n"+
+                listingOfColumnNames(newFields, 0) + ")))\n" +
                 "BEGIN\n" +
                 "\tALTER TABLE TRF_" + pureTableName + " \n" +
                 "\tADD" +
@@ -66,11 +61,11 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][TRF] P17152-" + userStoryNumber +
-                ": TRF_" + pureTableName + "'\n";
+                ": TRF_" + pureTableName + "'\n\nGO\n";
     }
 
-    private String generateODSBasePart(){
-        if (newFields.stream().noneMatch(f -> f.getScdType().equals("1"))){
+    private String generateODSBasePart() {
+        if (newFields.stream().noneMatch(f -> f.getScdType().equals("1"))) {
             return "";
         }
         return "\nIF (NOT EXISTS (SELECT * \n" +
@@ -93,17 +88,17 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] P17152-" + userStoryNumber +
-                ": CS_" + pureTableName + "_BASE'\n";
+                ": CS_" + pureTableName + "_BASE'\n\nGO\n";
     }
 
-    private String generateODSDeltaPart(){
-        if (newFields.stream().noneMatch(f -> f.getScdType().equals("2"))){
+    private String generateODSDeltaPart() {
+        if (newFields.stream().noneMatch(f -> f.getScdType().equals("2"))) {
             return "";
         }
         return "\nIF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.COLUMNS\n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'CS_" + pureTableName +"_DELTA'\n" +
+                "\t\t\tAND  TABLE_NAME = 'CS_" + pureTableName + "_DELTA'\n" +
                 "\t\t\tAND COLUMN_NAME IN (" +
                 listingOfColumnNames(newFields
                         .stream()
@@ -120,17 +115,17 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
                 "\nEND\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] P17152-" + userStoryNumber +
-                ": CS_" + pureTableName + "_DELTA'";
+                ": CS_" + pureTableName + "_DELTA'\n\nGO\n";
     }
 
     private String generateConstraintsPart() {
         List<Field> allKeyFields = getKeyFieldsList(newFields);
-        String constraintPartScript ="";
+        String constraintPartScript = "";
         for (Field field : allKeyFields) {
             constraintPartScript = constraintPartScript + generateSingleConstraint(field, primaryTableName);
         }
         if (!constraintPartScript.equals("")) {
-            return "\n/* Constraints */\n" + constraintPartScript;
+            return "\n/* Constraints */" + constraintPartScript;
         } else {
             return "";
         }
@@ -138,11 +133,11 @@ public class ScriptGeneratorForEditingEntitiesPCCC extends ScriptGenerator {
 
     private String generateIndexesPart() {
         List<Field> allKeyFields = getKeyFieldsList(newFields);
-        String indexPartScript ="";
+        String indexPartScript = "";
         for (Field field : allKeyFields) {
             indexPartScript = indexPartScript +
                     generateSingleIndex(field.getScdType(), field.getColumnName(), field, primaryTableName);
         }
-        return "\n/* Indexes */\n" + indexPartScript;
+        return "\n/* Indexes */" + indexPartScript;
     }
 }

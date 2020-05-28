@@ -99,16 +99,26 @@ public class ExcelInputController {
                 String joinedTable;
                 String primaryKeyOfJoinedTable;
                 if (i == 3) {
-                    joinedTable = "Z_CS_" + field.getColumnName().replace("_KEY", "") + "_BASE";
-                    primaryKeyOfJoinedTable = field.getColumnName();
+                    String pureColumnName = field.getColumnName().replace("_KEY", "");
+                    if (field.getSourceTable().contains("CCX") || field.getSourceTable().contains("PCX")){
+                        joinedTable = "Z_CS_" + pureColumnName + "_BASE";
+                        Field.setPrimaryTable(joinedTable);
+                        primaryKeyOfJoinedTable = field.getColumnName();
+                    } else {
+                        joinedTable = "CS_" + pureColumnName+ "_BASE";
+                        Field.setPrimaryTable(joinedTable);
+                        primaryKeyOfJoinedTable = field.getColumnName();
+                    }
                 } else {
-                    joinedTable = ScriptGenerator.generateJoinedTableName(field.getSourceTable());
-                    primaryKeyOfJoinedTable = ScriptGenerator.generatePrimaryKeyOfJoinedTableName(field.getSourceTable());
+                    joinedTable = ScriptGenerator.generateJoinedTableName(field.getSourceTable(), field.getColumnName());
+                    primaryKeyOfJoinedTable = ScriptGenerator.generatePrimaryKeyOfJoinedTableName(field.getSourceTable(), field.getColumnName());
                 }
                 field.setJoinedTable(joinedTable);
                 field.setPrimaryKeyOfJoinedTable(primaryKeyOfJoinedTable);
             }
-            ScriptGenerator.extractSourceColumnName(field);
+            if (field.getSourceTable().contains("BC")){
+                ScriptGenerator.extractSourceColumnName(field);
+            }
             fieldRepository.save(field);
         }
         return "redirect:/excel/rowgenerator";
