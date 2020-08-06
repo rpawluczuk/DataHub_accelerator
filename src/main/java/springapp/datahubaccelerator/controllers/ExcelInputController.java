@@ -78,49 +78,7 @@ public class ExcelInputController {
         Sheet sheet = excelComponent.getListOfSheets().stream()
                 .filter(s -> s.getSheetName().equals(choosenSheetName))
                 .findFirst().get();
-        Field.setFromJoinWhere(sheet.getRow(3).getCell(19).getStringCellValue().toUpperCase());
-        for (int i = 3; !sheet.getRow(i).getCell(1).getStringCellValue().isEmpty(); i++) {
-            Field field = new Field();
-            field.setTargetExtract(sheet.getRow(i).getCell(1).getStringCellValue()
-                    .toUpperCase().replace("BDE_", ""));
-            field.setColumnName(sheet.getRow(i).getCell(3).getStringCellValue().replace("(FK)", "")
-                    .replace("(PK)", "").trim());
-            field.setDatatype(sheet.getRow(i).getCell(4).getStringCellValue());
-            if (sheet.getRow(i).getCell(8).getCellType().equals(CellType.STRING)) {
-                field.setScdType(sheet.getRow(i).getCell(8).getStringCellValue());
-            } else {
-                field.setScdType("" + (int) sheet.getRow(i).getCell(8).getNumericCellValue());
-            }
-            field.setSourceTable(sheet.getRow(i).getCell(16).getStringCellValue().toUpperCase());
-            field.setColumnMapping(sheet.getRow(i).getCell(18).getStringCellValue().toUpperCase());
-            field.setGeneralRuleApplied(sheet.getRow(i).getCell(36).getStringCellValue());
-            field.setReasonAdded(sheet.getRow(i).getCell(40).getStringCellValue());
-            if (field.getColumnName().contains("KEY")) {
-                String joinedTable;
-                String primaryKeyOfJoinedTable;
-                if (i == 3) {
-                    String pureColumnName = field.getColumnName().replace("_KEY", "");
-                    if (field.getSourceTable().contains("CCX") || field.getSourceTable().contains("PCX")){
-                        joinedTable = "Z_CS_" + pureColumnName + "_BASE";
-                        Field.setPrimaryTable(joinedTable);
-                        primaryKeyOfJoinedTable = field.getColumnName();
-                    } else {
-                        joinedTable = "CS_" + pureColumnName+ "_BASE";
-                        Field.setPrimaryTable(joinedTable);
-                        primaryKeyOfJoinedTable = field.getColumnName();
-                    }
-                } else {
-                    joinedTable = ScriptGenerator.generateJoinedTableName(field.getSourceTable(), field.getColumnName());
-                    primaryKeyOfJoinedTable = ScriptGenerator.generatePrimaryKeyOfJoinedTableName(field.getSourceTable(), field.getColumnName());
-                }
-                field.setJoinedTable(joinedTable);
-                field.setPrimaryKeyOfJoinedTable(primaryKeyOfJoinedTable);
-            }
-            if (field.getSourceTable().contains("BC")){
-                ScriptGenerator.extractSourceColumnName(field);
-            }
-            fieldRepository.save(field);
-        }
+        excelInputService.extractFieldsFromExcel(sheet);
         return "redirect:/excel/rowgenerator";
     }
 
@@ -131,6 +89,10 @@ public class ExcelInputController {
         Set<String> allUserStories = allFields.stream()
                 .map(x -> x.getReasonAdded())
                 .collect(Collectors.toSet());
+        if (allUserStories.size() <= 1){
+            this.formHandlerComponent.setSelectedUserStories(allUserStories);
+            return "redirect:/keyfields";
+        }
         model.addAttribute("userStories", allUserStories);
         model.addAttribute("formHandlerComponent", formHandlerComponent);
         return "rowgenerator";

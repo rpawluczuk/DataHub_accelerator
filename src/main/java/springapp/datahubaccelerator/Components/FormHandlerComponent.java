@@ -3,21 +3,22 @@ package springapp.datahubaccelerator.Components;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 
 @Component
 public class FormHandlerComponent {
 
-    private List<String> SelectedUserStories;
+    private Set<String> SelectedUserStories;
 
     public FormHandlerComponent() {
     }
 
-    public List<String> getSelectedUserStories() {
+    public Set<String> getSelectedUserStories() {
         return SelectedUserStories;
     }
 
-    public void setSelectedUserStories(List<String> selectedUserStories) {
+    public void setSelectedUserStories(Set<String> selectedUserStories) {
         SelectedUserStories = selectedUserStories;
     }
 }

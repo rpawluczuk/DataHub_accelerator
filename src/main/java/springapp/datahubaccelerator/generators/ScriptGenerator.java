@@ -1,5 +1,7 @@
 package springapp.datahubaccelerator.generators;
 
+import springapp.datahubaccelerator.DontAllowedSheets;
+import springapp.datahubaccelerator.OOTBTables;
 import springapp.datahubaccelerator.domain.Field;
 
 import java.util.Arrays;
@@ -40,6 +42,11 @@ public class ScriptGenerator {
     }
 
     public static String generateJoinedTableName(String sourceTable, String columnName) {
+        for (OOTBTables ootbTables: OOTBTables.values()) {
+               if (ootbTables.getOotbSourceTable().equals(sourceTable)){
+                   return ootbTables.getOotbTable();
+               }
+        }
         if (sourceTable.contains("\n")){
             return "Z_CS_" + columnName.replace("_KEY", "") + "_BASE";
         }
@@ -60,6 +67,11 @@ public class ScriptGenerator {
     }
 
     public static String generatePrimaryKeyOfJoinedTableName(String sourceTable, String columnName) {
+        for (OOTBTables ootbTables: OOTBTables.values()) {
+            if (ootbTables.getOotbSourceTable().equals(sourceTable)){
+                return ootbTables.getOotbPrimaryKey();
+            }
+        }
         if (sourceTable.contains("\n")){
             return columnName;
         }

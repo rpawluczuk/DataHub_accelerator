@@ -17,7 +17,9 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
     public ScriptGeneratorForCreatingEntitiesPCCC(List<Field> allFields) {
         this.allFields = allFields;
         this.targetExtract = allFields.get(0).getTargetExtract();
-        this.pureTableName = allFields.get(0).getColumnName().replace("_KEY", "");
+        this.pureTableName = Field.getPrimaryTable().replace("Z_", "")
+                .replace("CS_", "")
+                .replace("_BASE", "");
         this.userStoryNumber = allFields.get(0).getReasonAdded();
         this.primaryKeyColumnName = allFields.get(0).getColumnName();
         this.primaryTableName = allFields.get(0).getJoinedTable();
@@ -50,16 +52,16 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "IF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'Z_TRF_" + targetExtract + "'))\n" +
+                "\t\t\tAND  TABLE_NAME = 'Z_TRF_" + pureTableName + "'))\n" +
                 "BEGIN\n" +
-                "CREATE TABLE [dbo].[Z_TRF_" + targetExtract + "](" +
+                "CREATE TABLE [dbo].[Z_TRF_" + pureTableName + "](" +
                 "\n\t" + generateRowsForScript(allFields, 0) +
                 "\n\t,[ETL_ROW_EFF_DTS]      datetime2(7)\tNOT NULL\n" +
                 ")\n" +
                 "END\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][TRF] " +
-                userStoryNumber + ": Z_TRF_" + targetExtract + "'\n" +
+                userStoryNumber + ": Z_TRF_" + pureTableName + "'\n" +
                 "\nGO\n";
     }
 
@@ -69,9 +71,9 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "IF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'Z_CS_" + targetExtract + "_BASE'))\n" +
+                "\t\t\tAND  TABLE_NAME = 'Z_CS_" + pureTableName + "_BASE'))\n" +
                 "BEGIN\n" +
-                "\tCREATE TABLE [dbo].[Z_CS_" + targetExtract + "_BASE](\n" +
+                "\tCREATE TABLE [dbo].[Z_CS_" + pureTableName + "_BASE](\n" +
                 "\t [" + primaryKeyColumnName.replace("KEY", "BID") + "]\tint IDENTITY(1,1) NOT NULL\n" +
                 "\t,[" + primaryKeyColumnName + "]\tvarchar(100)\tNOT NULL\n" +
                 "\t,[SOURCE_SYSTEM]\tvarchar(10)\tNOT NULL\n\t," +
@@ -87,11 +89,11 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "\t,[ETL_ACTIVE_FL]\tvarchar(1)\tNOT NULL\n" +
                 "\t,[ETL_ADD_DTS]\tdatetime2(7)\tNULL\n" +
                 "\t,[ETL_LAST_UPDATE_DTS]\tdatetime2(7)\tNOT NULL\n" +
-                "CONSTRAINT [Z_" + generateShortcut(targetExtract, "BASE") + "_PK] PRIMARY KEY NONCLUSTERED \n" +
+                "CONSTRAINT [Z_" + generateShortcut(pureTableName, "BASE") + "_PK] PRIMARY KEY NONCLUSTERED \n" +
                 "(\n" +
                 "\t[" + primaryKeyColumnName + "] ASC\n" +
                 "),\n" +
-                "CONSTRAINT [Z_" + generateShortcut(targetExtract, "BASE") + "_AK1] UNIQUE NONCLUSTERED \n" +
+                "CONSTRAINT [Z_" + generateShortcut(pureTableName, "BASE") + "_AK1] UNIQUE NONCLUSTERED \n" +
                 "(\n" +
                 "\t[" + primaryKeyColumnName.replace("KEY", "BID") + "] ASC\n" +
                 ")\n" +
@@ -99,7 +101,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "END\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] " +
-                userStoryNumber + ": Z_CS_" + targetExtract + "_BASE'\n" +
+                userStoryNumber + ": Z_CS_" + pureTableName + "_BASE'\n" +
                 "\nGO\n";
     }
 
@@ -108,9 +110,9 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
         return "\nIF (NOT EXISTS (SELECT * \n" +
                 "\t\t\tFROM INFORMATION_SCHEMA.TABLES \n" +
                 "\t\t\tWHERE TABLE_SCHEMA = 'dbo' \n" +
-                "\t\t\tAND  TABLE_NAME = 'Z_CS_" + targetExtract + "_DELTA'))\n" +
+                "\t\t\tAND  TABLE_NAME = 'Z_CS_" + pureTableName + "_DELTA'))\n" +
                 "BEGIN\n" +
-                "\tCREATE TABLE [dbo].[Z_CS_" + targetExtract + "_DELTA](\n" +
+                "\tCREATE TABLE [dbo].[Z_CS_" + pureTableName + "_DELTA](\n" +
                 "\t [" + primaryKeyColumnName.replace("KEY", "DID") + "]\tint IDENTITY(1,1) NOT NULL\n" +
                 "\t,[" + primaryKeyColumnName + "]\tvarchar(100)\tNOT NULL\n" +
                 "\t,[ETL_ROW_EFF_DTS]\tdatetime2(7)\tNOT NULL\n" +
@@ -128,12 +130,12 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "\t,[ETL_ACTIVE_FL]\tvarchar(1)\tNOT NULL\n" +
                 "\t,[ETL_ADD_DTS]\tdatetime2(7)\tNULL\n" +
                 "\t,[ETL_LAST_UPDATE_DTS]\tdatetime2(7)\tNOT NULL\n" +
-                " CONSTRAINT [Z_" + generateShortcut(targetExtract, "DELTA") + "_PK] PRIMARY KEY NONCLUSTERED \n" +
+                " CONSTRAINT [Z_" + generateShortcut(pureTableName, "DELTA") + "_PK] PRIMARY KEY NONCLUSTERED \n" +
                 "(\n" +
                 "\t[" + primaryKeyColumnName + "] ASC,\n" +
                 "\t[ETL_ROW_EFF_DTS] ASC\n" +
                 "),\n" +
-                " CONSTRAINT [Z_" + generateShortcut(targetExtract, "DELTA") + "_AK1] UNIQUE NONCLUSTERED \n" +
+                " CONSTRAINT [Z_" + generateShortcut(pureTableName, "DELTA") + "_AK1] UNIQUE NONCLUSTERED \n" +
                 "(\n" +
                 "\t[" + primaryKeyColumnName.replace("KEY", "DID") + "] ASC\n" +
                 ")\n" +
@@ -141,7 +143,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                 "END\n" +
                 "ELSE\n" +
                 "PRINT '['+CONVERT( VARCHAR(24), GETDATE(), 120)+'][SCRIPT OMITTED][ODS] " +
-                userStoryNumber + ": Z_CS_" + targetExtract + "_DELTA'\n" +
+                userStoryNumber + ": Z_CS_" + pureTableName + "_DELTA'\n" +
                 "\nGO\n";
     }
 
