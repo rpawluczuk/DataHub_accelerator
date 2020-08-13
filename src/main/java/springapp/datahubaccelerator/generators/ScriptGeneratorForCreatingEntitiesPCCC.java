@@ -85,7 +85,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
                         .filter(x -> !x.getColumnName().contains("X_SEQ_NO"))
                         .filter(x -> !x.getColumnName().contains("SOURCE_SYSTEM"))
                         .collect(Collectors.toList()), 0) +
-                "\n\t,[ETL_LATE_ARRIVING_SCD]\tvarchar(1)\tNOT NULL\n" +
+                "[ETL_LATE_ARRIVING_SCD]\tvarchar(1)\tNOT NULL\n" +
                 "\t,[ETL_ACTIVE_FL]\tvarchar(1)\tNOT NULL\n" +
                 "\t,[ETL_ADD_DTS]\tdatetime2(7)\tNULL\n" +
                 "\t,[ETL_LAST_UPDATE_DTS]\tdatetime2(7)\tNOT NULL\n" +
@@ -155,7 +155,7 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
         for (Field field : allKeyFields) {
             constraintPartScript = constraintPartScript + generateSingleConstraint(field, primaryTableName);
         }
-        return "\n/* Constraints */" + constraintPartScript + "\nGO\n";
+        return "\n/* Constraints */" + constraintPartScript;
     }
 
     private String generateIndexesPart() {
@@ -169,6 +169,6 @@ public class ScriptGeneratorForCreatingEntitiesPCCC extends ScriptGenerator {
         }
         return "\n/* Indexes */" + indexPartScript +
                 generateSingleIndex("1", "ETL_LAST_UPDATE_DTS", allKeyFields.get(0), primaryTableName) +
-                generateSingleIndex("2", "ETL_LAST_UPDATE_DTS", allKeyFields.get(0), primaryTableName) + "\nGO\n";
+                generateSingleIndex("2", "ETL_LAST_UPDATE_DTS", allKeyFields.get(0), primaryTableName);
     }
 }

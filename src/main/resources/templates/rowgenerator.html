@@ -11,8 +11,11 @@
 </head>
 <body>
 <div class="container">
-    <h2 class="font-weight-bold">Check if the rows meet your expectations. If not, the reason is a mistake
-        in the data which you sent. To fix it return to the start page, make corrections in the input and try again</h2>
+    <h2 class="font-weight-bold"> Please select appropriate user stories from the checklist that should be taken into account
+        during script generation</h2>
+    <h5 class="font-weight-bold"> If none of the user stories are selected, the algorithm will take the one it seems be
+        the most recent and generate script for extension of an existing entity</h5>
+    <h5 class="font-weight-bold"> If all of the user stories are selected, then the script for new entity will be generated</h5>
     <br/>
     <form class="form-horizontal" th:action="@{/handleSelectedUserStories}" method="post" th:object="${formHandlerComponent}">
         <ul>
@@ -24,7 +27,8 @@
             </li>
         </ul>
         <div class="row">
-            <button type="submit">Submit</button>
+            <button class="btn btn-dark btn-lg" style="margin:5px;" type="submit">Check joined tables</button>
+            <a href="/addinput" class="btn btn-dark btn-lg" style="margin:5px;" role="button" aria-pressed="true">Back to start</a>
         </div>
     </form>
 
@@ -52,10 +56,6 @@
         </tr>
         </tbody>
     </table>
-    <div class="row">
-        <a href="/keyfields" class="btn btn-dark btn-lg" style="margin:5px;" role="button" aria-pressed="true">Check joined tables</a>
-        <a href="/addinput" class="btn btn-dark btn-lg" style="margin:5px;" role="button" aria-pressed="true">Back to start</a>
-    </div>
     <br/><br/>
 </div>
 </body>
